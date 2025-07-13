@@ -1,15 +1,15 @@
 
 using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Window;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [System.Serializable]
     public struct MenuStyling
     {
-        [SerializeField] WindowSetup _windowSetup;
-        [SerializeField] LayoutSetup _layoutSetup;
+        [Export] WindowSetup _windowSetup;
+        [Export] LayoutSetup _layoutSetup;
         public WindowSetup windowSetup => _windowSetup;
         public LayoutSetup layoutSetup => _layoutSetup;
 

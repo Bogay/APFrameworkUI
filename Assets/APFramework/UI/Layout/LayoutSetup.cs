@@ -1,19 +1,18 @@
-
 using ChosenConcept.APFramework.UI.Menu;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Layout
 {
     [System.Serializable]
     public struct LayoutSetup
     {
-        [SerializeField] MenuLayer _menuLayer;
-        [SerializeField] WindowAlignment _windowAlignment;
-        [SerializeField] WindowDirection _windowDirection;
-        [SerializeField] OffsetSource _offsetSource;
-        [SerializeField] OffsetType _offsetType;
-        [SerializeField] Vector4 _offset;
-        [SerializeField] int _spacing;
+        [Export] MenuLayer _menuLayer;
+        [Export] WindowAlignment _windowAlignment;
+        [Export] WindowDirection _windowDirection;
+        [Export] OffsetSource _offsetSource;
+        [Export] OffsetType _offsetType;
+        [Export] Vector4 _offset;
+        [Export] int _spacing;
         public MenuLayer MenuLayer => _menuLayer;
         public WindowAlignment windowAlignment => _windowAlignment;
         public WindowDirection windowDirection => _windowDirection;
@@ -28,7 +27,7 @@ namespace ChosenConcept.APFramework.UI.Layout
             _windowDirection = WindowDirection.Horizontal,
             _offsetSource = OffsetSource.Fullscreen,
             _offsetType = OffsetType.Pixel,
-            _offset = Vector4.zero,
+            _offset = Vector4.Zero,
             _spacing = -10
         };
         public LayoutSetup SetLayer(MenuLayer layer)

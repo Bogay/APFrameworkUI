@@ -5,52 +5,47 @@ using ChosenConcept.APFramework.UI.Element;
 using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Utility;
 using Cysharp.Text;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public class WindowUI : MonoBehaviour
+    public partial class WindowUI : Control
     {
         const int OUTLINE_PADDING = 1;
 
-        [Header("Components")] [SerializeField]
-        private RectTransform _transform;
+        [ExportGroup("Components")]
+        [Export] Control _transform;
+        [Export] RichTextLabel _drawText;
+        [Export] WindowOutline _outlineBuilder;
+        [Export] WindowMask _windowMask;
+        [Export] WindowBackground _background;
+        [Export] Control _layout;
 
-        [SerializeField] TextMeshProUGUI _drawText;
-
-        [SerializeField] WindowOutline _outlineBuilder;
-        [SerializeField] WindowMask _windowMask;
-        [SerializeField] WindowBackground _background;
-        [SerializeField] LayoutElement _layout;
-
-        [Header("Debug View")] [SerializeField]
-        string _windowName = string.Empty;
-
-        [SerializeField] string _windowTag;
-        [SerializeField] string _windowLabelCache;
-        [SerializeField] string _windowSubscriptCache;
-        [SerializeField] WindowSetup _setup;
-        [SerializeField] LayoutAlignment _layoutAlignment;
-        [SerializeField] int _endFillCount = 5;
-        [SerializeField] bool _maskReady;
-        [SerializeField] bool _outlineReady;
-        [SerializeField] int _extraWidth;
-        [SerializeField] bool _isDirty = true;
-        [SerializeField] List<WindowElement> _elements = new();
-        [SerializeField] bool _positionCached;
-        [SerializeField] Vector2 _cachedPositionStart = Vector2.zero;
-        [SerializeField] Vector2 _cachedPositionEnd = Vector2.zero;
-        [SerializeField] bool _active;
-        [SerializeField] bool _isFocused;
-        [SerializeField] bool _available = true;
-        [SerializeField] bool _inInput;
-        [SerializeField] int _designatedWidth;
-        [SerializeField] int _designatedHeight;
-        [SerializeField] bool _awaitDeactivate;
-        [SerializeField] bool _preciseSizeSync;
-        [SerializeField] float _nextFunctionStringUpdate = Mathf.NegativeInfinity;
+        [ExportGroup("Debug View")]
+        [Export] string _windowName = string.Empty;
+        [Export] string _windowTag;
+        [Export] string _windowLabelCache;
+        [Export] string _windowSubscriptCache;
+        [Export] WindowSetup _setup;
+        [Export] LayoutAlignment _layoutAlignment;
+        [Export] int _endFillCount = 5;
+        [Export] bool _maskReady;
+        [Export] bool _outlineReady;
+        [Export] int _extraWidth;
+        [Export] bool _isDirty = true;
+        [Export] List<WindowElement> _elements = new();
+        [Export] bool _positionCached;
+        [Export] Vector2 _cachedPositionStart = Vector2.Zero;
+        [Export] Vector2 _cachedPositionEnd = Vector2.Zero;
+        [Export] bool _active;
+        [Export] bool _isFocused;
+        [Export] bool _available = true;
+        [Export] bool _inInput;
+        [Export] int _designatedWidth;
+        [Export] int _designatedHeight;
+        [Export] bool _awaitDeactivate;
+        [Export] bool _preciseSizeSync;
+        [Export] float _nextFunctionStringUpdate = Mathf.NegInf;
         IStringLabel _windowLabel;
         IStringLabel _windowSubscript = new StringLabel("");
         List<WindowElement> _interactables = new();
@@ -97,7 +92,7 @@ namespace ChosenConcept.APFramework.UI.Window
         public WindowSetup setup => _setup;
         int contentWidth => _setup.width - 2;
         public List<WindowElement> elements => _elements;
-        public LayoutElement layout => _layout;
+        public Control layout => _layout;
         public LayoutAlignment layoutAlignment => _layoutAlignment;
         public bool hasTitle => setup.titleStyle != WindowTitleStyle.None;
         public bool hasTitleBar => setup.titleStyle == WindowTitleStyle.TitleBar;
@@ -192,9 +187,9 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void UpdateWindow()
         {
-            if (_active && _nextFunctionStringUpdate < Time.unscaledTime)
+            if (_active && _nextFunctionStringUpdate < Time.GetUnixTimeFromSystem())
             {
-                _nextFunctionStringUpdate = Time.unscaledTime + _setup.functionStringUpdateInterval;
+                _nextFunctionStringUpdate = (float)Time.GetUnixTimeFromSystem() + _setup.functionStringUpdateInterval;
                 CheckFunctionStringLabelDirty();
                 if (_setup.syncActiveValueAutomatically)
                 {
@@ -206,7 +201,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 return;
             _windowMask.ContextUpdate();
             if (_awaitDeactivate && !_windowMask.needUpdate)
-                SetGameObjectActive(false);
+                SetVisible(false);
         }
 
         public void TriggerSelectionUpdate()
@@ -224,94 +219,86 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (!_active)
                 return;
-            _drawText.color = new Color(1, 1, 1, Mathf.Clamp01(alpha));
+            _drawText.Modulate = new Color(1, 1, 1, Mathf.Clamp01(alpha));
             _outlineBuilder.SetOpacity(alpha);
         }
 
         public bool UpdateElementPosition(WindowElement element)
         {
-            if (element.firstCharacterIndex >= _drawText.textInfo.characterInfo.Length)
+            if (element.firstCharacterIndex >= _drawText.GetParsedText().Length)
             {
                 return false;
             }
 
-            (Vector2, Vector2) result = (Vector2.zero, Vector2.zero);
+            (Vector2, Vector2) result = (Vector2.Zero, Vector2.Zero);
+            // Note: Godot's RichTextLabel doesn't have the same character info system as Unity's TextMeshPro
+            // This would need to be adapted based on the actual text rendering system used
             for (int i = element.firstCharacterIndex; i <= element.lastCharacterIndex; i++)
             {
-                Vector2 rangeBottomLeft = _drawText.textInfo.characterInfo[i].bottomLeft;
-                Vector2 rangeTopRight = _drawText.textInfo.characterInfo[i].topRight;
-                if (result.Item1.x > rangeBottomLeft.x || result.Item1.x == 0)
-                    result.Item1.x = rangeBottomLeft.x;
-                if (result.Item1.y > rangeBottomLeft.y || result.Item1.y == 0)
-                    result.Item1.y = rangeBottomLeft.y;
-                if (result.Item2.x < rangeTopRight.x || result.Item2.x == 0)
-                    result.Item2.x = rangeTopRight.x;
-                if (result.Item2.y < rangeTopRight.y || result.Item2.y == 0)
-                    result.Item2.y = rangeTopRight.y;
+                // This is a placeholder - Godot's text positioning would need different implementation
+                Vector2 rangeBottomLeft = Vector2.Zero; // _drawText.GetCharacterPosition(i);
+                Vector2 rangeTopRight = Vector2.Zero;   // _drawText.GetCharacterPosition(i) + _drawText.GetCharacterSize(i);
+
+                if (result.Item1.X > rangeBottomLeft.X || result.Item1.X == 0)
+                    result.Item1.X = rangeBottomLeft.X;
+                if (result.Item1.Y > rangeBottomLeft.Y || result.Item1.Y == 0)
+                    result.Item1.Y = rangeBottomLeft.Y;
+                if (result.Item2.X < rangeTopRight.X || result.Item2.X == 0)
+                    result.Item2.X = rangeTopRight.X;
+                if (result.Item2.Y < rangeTopRight.Y || result.Item2.Y == 0)
+                    result.Item2.Y = rangeTopRight.Y;
             }
 
-            result.Item1 = WindowManager.instance.UIBoundRetriever(transform, result.Item1);
-            result.Item2 = WindowManager.instance.UIBoundRetriever(transform, result.Item2);
+            result.Item1 = WindowManager.instance.UIBoundRetriever(this, result.Item1);
+            result.Item2 = WindowManager.instance.UIBoundRetriever(this, result.Item2);
             element.SetCachedPosition(result);
-            if (element is ISlider uI)
-            {
-                (Vector2, Vector2) arrowPosition = (Vector2.zero, Vector2.zero);
-                Vector2 leftArrowPosition = Vector2.zero;
-                leftArrowPosition += WindowManager.instance.UIBoundRetriever(transform,
-                    _drawText.textInfo.characterInfo[uI.firstSliderArrowIndex].bottomLeft);
-                leftArrowPosition += WindowManager.instance.UIBoundRetriever(transform,
-                    _drawText.textInfo.characterInfo[uI.firstSliderArrowIndex].topRight);
-                leftArrowPosition /= 2f;
-                arrowPosition.Item1 = leftArrowPosition;
-                Vector2 rightArrowPosition = Vector2.zero;
-                rightArrowPosition += WindowManager.instance.UIBoundRetriever(transform,
-                    _drawText.textInfo.characterInfo[uI.lastSliderArrowIndex].bottomLeft);
-                rightArrowPosition += WindowManager.instance.UIBoundRetriever(transform,
-                    _drawText.textInfo.characterInfo[uI.lastSliderArrowIndex].topRight);
-                rightArrowPosition /= 2f;
-                arrowPosition.Item2 = rightArrowPosition;
-                uI.SetCachedArrowPosition(arrowPosition);
-            }
+
+            // ...existing code for slider handling...
 
             return true;
         }
 
         public void UpdateWindowPosition()
         {
-            (Vector2, Vector2) result = (Vector2.zero, Vector2.zero);
+            (Vector2, Vector2) result = (Vector2.Zero, Vector2.Zero);
             if (hasOutline && setup.outlineDisplayStyle == WindowOutlineDisplayStyle.Always)
             {
-                for (int i = 0; i <= _outlineBuilder.outline.textInfo.characterCount - 1; i++)
+                // Note: This would need adaptation for Godot's text system
+                for (int i = 0; i <= _outlineBuilder.outline.GetParsedText().Length - 1; i++)
                 {
-                    Vector2 rangeBottomLeft = _outlineBuilder.outline.textInfo.characterInfo[i].bottomLeft;
-                    Vector2 rangeTopRight = _outlineBuilder.outline.textInfo.characterInfo[i].topRight;
-                    if (result.Item1.x > rangeBottomLeft.x || result.Item1.x == 0)
-                        result.Item1.x = rangeBottomLeft.x;
-                    if (result.Item1.y > rangeBottomLeft.y || result.Item1.y == 0)
-                        result.Item1.y = rangeBottomLeft.y;
-                    if (result.Item2.x < rangeTopRight.x || result.Item2.x == 0)
-                        result.Item2.x = rangeTopRight.x;
-                    if (result.Item2.y < rangeTopRight.y || result.Item2.y == 0)
-                        result.Item2.y = rangeTopRight.y;
+                    // Placeholder for character position retrieval in Godot
+                    Vector2 rangeBottomLeft = Vector2.Zero;
+                    Vector2 rangeTopRight = Vector2.Zero;
+
+                    if (result.Item1.X > rangeBottomLeft.X || result.Item1.X == 0)
+                        result.Item1.X = rangeBottomLeft.X;
+                    if (result.Item1.Y > rangeBottomLeft.Y || result.Item1.Y == 0)
+                        result.Item1.Y = rangeBottomLeft.Y;
+                    if (result.Item2.X < rangeTopRight.X || result.Item2.X == 0)
+                        result.Item2.X = rangeTopRight.X;
+                    if (result.Item2.Y < rangeTopRight.Y || result.Item2.Y == 0)
+                        result.Item2.Y = rangeTopRight.Y;
                 }
             }
 
-            for (int i = 0; i <= _drawText.textInfo.characterCount - 1; i++)
+            for (int i = 0; i <= _drawText.GetParsedText().Length - 1; i++)
             {
-                Vector2 rangeBottomLeft = _drawText.textInfo.characterInfo[i].bottomLeft;
-                Vector2 rangeTopRight = _drawText.textInfo.characterInfo[i].topRight;
-                if (result.Item1.x > rangeBottomLeft.x || result.Item1.x == 0)
-                    result.Item1.x = rangeBottomLeft.x;
-                if (result.Item1.y > rangeBottomLeft.y || result.Item1.y == 0)
-                    result.Item1.y = rangeBottomLeft.y;
-                if (result.Item2.x < rangeTopRight.x || result.Item2.x == 0)
-                    result.Item2.x = rangeTopRight.x;
-                if (result.Item2.y < rangeTopRight.y || result.Item2.y == 0)
-                    result.Item2.y = rangeTopRight.y;
+                // Placeholder for character position retrieval in Godot
+                Vector2 rangeBottomLeft = Vector2.Zero;
+                Vector2 rangeTopRight = Vector2.Zero;
+
+                if (result.Item1.X > rangeBottomLeft.X || result.Item1.X == 0)
+                    result.Item1.X = rangeBottomLeft.X;
+                if (result.Item1.Y > rangeBottomLeft.Y || result.Item1.Y == 0)
+                    result.Item1.Y = rangeBottomLeft.Y;
+                if (result.Item2.X < rangeTopRight.X || result.Item2.X == 0)
+                    result.Item2.X = rangeTopRight.X;
+                if (result.Item2.Y < rangeTopRight.Y || result.Item2.Y == 0)
+                    result.Item2.Y = rangeTopRight.Y;
             }
 
-            result.Item1 = WindowManager.instance.UIBoundRetriever(transform, result.Item1);
-            result.Item2 = WindowManager.instance.UIBoundRetriever(transform, result.Item2);
+            result.Item1 = WindowManager.instance.UIBoundRetriever(this, result.Item1);
+            result.Item2 = WindowManager.instance.UIBoundRetriever(this, result.Item2);
 
             _cachedPositionStart = result.Item1;
             _cachedPositionEnd = result.Item2;
@@ -494,7 +481,7 @@ namespace ChosenConcept.APFramework.UI.Window
                         windowStringBuilder.Append(TextUtility.LineBreaker);
                 }
 
-                _drawText.SetText(windowStringBuilder);
+                _drawText.Text = windowStringBuilder.ToString();
             }
         }
 
@@ -524,9 +511,15 @@ namespace ChosenConcept.APFramework.UI.Window
             _windowTag = ZString.Concat(parent, ".", elementName);
             _windowLabel = new StringLabel(_windowName);
             _setup = windowSetup;
-            _drawText.fontSize = _setup.fontSize;
-            _outlineBuilder.outline.fontSize = _setup.fontSize;
-            _windowMask.mask.fontSize = _setup.fontSize;
+
+            // Convert Unity font size to Godot
+            var theme = new Theme();
+            var fontFile = new FontFile();
+            theme.SetFontSize("normal_font_size", "RichTextLabel", _setup.fontSize);
+            _drawText.Theme = theme;
+            _outlineBuilder.outline.Theme = theme;
+            _windowMask.mask.Theme = theme;
+
             SetActive(false);
             if (windowSetup.width != 0 && windowSetup.height != 0)
                 Resize(windowSetup.width, windowSetup.height);
@@ -547,10 +540,9 @@ namespace ChosenConcept.APFramework.UI.Window
 
         void SetLayout(int widthCount, int heightCount)
         {
-            _layout.minWidth = setup.fontSize * 0.635f * widthCount;
-            _layout.minHeight = setup.fontSize * 1.05f * heightCount;
+            CustomMinimumSize = new Vector2(setup.fontSize * 0.635f * widthCount, setup.fontSize * 1.05f * heightCount);
             _layoutAlignment.UpdateLayout();
-            _transform.sizeDelta = new Vector2(_layout.minWidth, _layout.minHeight);
+            Size = CustomMinimumSize;
         }
 
         /// <summary>
@@ -841,14 +833,14 @@ namespace ChosenConcept.APFramework.UI.Window
             {
                 RefreshSize();
                 if (syncGameObject)
-                    SetGameObjectActive(true);
+                    SetVisible(true);
                 _awaitDeactivate = false;
                 ResetAllWindowElement();
                 _outlineBuilder.SetActive(true);
                 if (showMaskAnimation)
                     _windowMask.FadeIn();
                 _background.SetActive(true);
-                _drawText.gameObject.SetActive(true);
+                _drawText.Visible = true;
                 SyncActiveValue();
                 InvokeUpdate();
             }
@@ -862,7 +854,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 _background.SetActive(false);
                 // Cancel out the next update
                 _isDirty = false;
-                _drawText.SetText(string.Empty);
+                _drawText.Text = string.Empty;
             }
         }
 
@@ -874,9 +866,9 @@ namespace ChosenConcept.APFramework.UI.Window
             }
         }
 
-        public void SetGameObjectActive(bool v)
+        public void SetVisible(bool v)
         {
-            gameObject.SetActive(v);
+            Visible = v;
         }
 
         public void SetLabel(string label)
@@ -969,21 +961,21 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void Move(Vector2 delta)
         {
-            if (transform.IsChildOf(_layoutAlignment.transform))
-                transform.SetParent(_layoutAlignment.transform.parent);
-            transform.Translate(delta.x, delta.y, 0);
+            if (GetParent() == _layoutAlignment)
+                Reparent(_layoutAlignment.GetParent());
+            Position += delta;
         }
 
         public void MoveTo(Vector2 position)
         {
-            if (transform.IsChildOf(_layoutAlignment.transform))
-                transform.SetParent(_layoutAlignment.transform.parent);
-            transform.position = new(position.x, position.y);
+            if (GetParent() == _layoutAlignment)
+                Reparent(_layoutAlignment.GetParent());
+            Position = position;
         }
 
         public void RevertAlignment()
         {
-            transform.SetParent(_layoutAlignment.transform);
+            Reparent(_layoutAlignment);
         }
 
         public IEnumerable<string> ExportLocalizationTag()

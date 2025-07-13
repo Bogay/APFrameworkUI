@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace ChosenConcept.APFramework.UI.Element
 {
     public interface ISlider

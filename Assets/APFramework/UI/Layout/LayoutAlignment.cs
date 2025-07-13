@@ -1,22 +1,24 @@
 using System;
 using System.Collections.Generic;
 using ChosenConcept.APFramework.UI.Window;
-using UnityEngine;
-using UnityEngine.UI;
+using Godot;
+
 namespace ChosenConcept.APFramework.UI.Layout
 {
-    public class LayoutAlignment : MonoBehaviour
+    public partial class LayoutAlignment : Node
     {
-        [SerializeField] HorizontalOrVerticalLayoutGroup _layoutGroup;
-        [SerializeField] LayoutSetup _layoutSetup;
-        [SerializeField] List<WindowUI> _windows = new();
-        static Vector2Int _referenceResolution = new(1920, 1080);
-        public void Initialize(HorizontalOrVerticalLayoutGroup layoutGroup, LayoutSetup layoutSetup)
+        [Export] Container _layoutGroup;
+        [Export] LayoutSetup _layoutSetup;
+        [Export] List<WindowUI> _windows = new();
+        static Vector2I _referenceResolution = new(1920, 1080);
+
+        public void Initialize(Container layoutGroup, LayoutSetup layoutSetup)
         {
             _layoutGroup = layoutGroup;
             _layoutSetup = layoutSetup;
             UpdateLayout();
         }
+
         public void UpdateLayout()
         {
             if (_layoutSetup.offsetSource == OffsetSource.CenterOfScreen)
@@ -28,93 +30,116 @@ namespace ChosenConcept.APFramework.UI.Layout
                 {
                     foreach (WindowUI window in _windows)
                     {
-                        accumulatedWidth += window.layout.minWidth;
+                        accumulatedWidth += window.layout.CustomMinimumSize.X;
 
-                        if (window.layout.minHeight > accumulatedHeight)
-                            accumulatedHeight = window.layout.minHeight;
+                        if (window.layout.CustomMinimumSize.Y > accumulatedHeight)
+                            accumulatedHeight = window.layout.CustomMinimumSize.Y;
                     }
                 }
                 else
                 {
                     foreach (WindowUI window in _windows)
                     {
-                        if (window.layout.minWidth > accumulatedWidth)
-                            accumulatedWidth = window.layout.minWidth;
+                        if (window.layout.CustomMinimumSize.X > accumulatedWidth)
+                            accumulatedWidth = window.layout.CustomMinimumSize.X;
 
-                        accumulatedHeight += window.layout.minHeight;
+                        accumulatedHeight += window.layout.CustomMinimumSize.Y;
                     }
                 }
-                float referenceMultiplier = Screen.height / (float)_referenceResolution.y;
-                float ratio = Screen.width / (float)Screen.height;
-                // int width = (int)(accumulatedWidth * referenceMultiplier / 2f);
+
+                Vector2I screenSize = DisplayServer.WindowGetSize();
+                float referenceMultiplier = screenSize.Y / (float)_referenceResolution.Y;
+                float ratio = screenSize.X / (float)screenSize.Y;
                 int width = 0;
-                // int height = (int)(accumulatedHeight * referenceMultiplier / 2f);
                 int height = 0;
 
-                _layoutGroup.padding.top = _layoutSetup.windowAlignment switch
+                // Set margins based on alignment (Godot uses margin_* properties)
+                if (_layoutGroup is MarginContainer marginContainer)
                 {
-                    WindowAlignment.UpperLeft or
-                        WindowAlignment.UpperCenter or
-                        WindowAlignment.UpperRight => _referenceResolution.y / 2 - height,
-                    _ => 0
-                };
-                _layoutGroup.padding.bottom = _layoutSetup.windowAlignment switch
-                {
-                    WindowAlignment.LowerLeft or
-                        WindowAlignment.LowerCenter or
-                        WindowAlignment.LowerRight => _referenceResolution.y / 2 - height,
-                    _ => 0
-                };
-                _layoutGroup.padding.left = _layoutSetup.windowAlignment switch
-                {
-                    WindowAlignment.UpperLeft or
-                        WindowAlignment.MiddleLeft or
-                        WindowAlignment.LowerLeft => (int)(_referenceResolution.y * ratio / 2 - width),
-                    _ => 0
-                };
-                _layoutGroup.padding.right = _layoutSetup.windowAlignment switch
-                {
-                    WindowAlignment.UpperRight or
-                        WindowAlignment.MiddleRight or
-                        WindowAlignment.LowerRight => (int)(_referenceResolution.y * ratio / 2 - width),
-                    _ => 0
-                };
+                    int topMargin = _layoutSetup.windowAlignment switch
+                    {
+                        WindowAlignment.UpperLeft or
+                            WindowAlignment.UpperCenter or
+                            WindowAlignment.UpperRight => _referenceResolution.Y / 2 - height,
+                        _ => 0
+                    };
 
-                Vector2 multiplier = _layoutSetup.offsetType switch
-                {
-                    OffsetType.Percentage => _referenceResolution / 2,
-                    OffsetType.Pixel => Vector2.one * referenceMultiplier,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                    int bottomMargin = _layoutSetup.windowAlignment switch
+                    {
+                        WindowAlignment.LowerLeft or
+                            WindowAlignment.LowerCenter or
+                            WindowAlignment.LowerRight => _referenceResolution.Y / 2 - height,
+                        _ => 0
+                    };
 
-                if (_layoutSetup.offset.x > 0)
-                    _layoutGroup.padding.top -= (int)(_layoutSetup.offset.x * multiplier.y);
-                if (_layoutSetup.offset.y > 0)
-                    _layoutGroup.padding.bottom -= (int)(_layoutSetup.offset.y * multiplier.y);
-                if (_layoutSetup.offset.z > 0)
-                    _layoutGroup.padding.left -= (int)(_layoutSetup.offset.z * multiplier.x);
-                if (_layoutSetup.offset.w > 0)
-                    _layoutGroup.padding.right -= (int)(_layoutSetup.offset.w * multiplier.x);
+                    int leftMargin = _layoutSetup.windowAlignment switch
+                    {
+                        WindowAlignment.UpperLeft or
+                            WindowAlignment.MiddleLeft or
+                            WindowAlignment.LowerLeft => (int)(_referenceResolution.Y * ratio / 2 - width),
+                        _ => 0
+                    };
+
+                    int rightMargin = _layoutSetup.windowAlignment switch
+                    {
+                        WindowAlignment.UpperRight or
+                            WindowAlignment.MiddleRight or
+                            WindowAlignment.LowerRight => (int)(_referenceResolution.Y * ratio / 2 - width),
+                        _ => 0
+                    };
+
+                    marginContainer.AddThemeConstantOverride("margin_top", topMargin);
+                    marginContainer.AddThemeConstantOverride("margin_bottom", bottomMargin);
+                    marginContainer.AddThemeConstantOverride("margin_left", leftMargin);
+                    marginContainer.AddThemeConstantOverride("margin_right", rightMargin);
+
+                    Vector2 multiplier = _layoutSetup.offsetType switch
+                    {
+                        OffsetType.Percentage => _referenceResolution / 2,
+                        OffsetType.Pixel => Vector2.One * referenceMultiplier,
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+
+                    if (_layoutSetup.offset.X > 0)
+                        marginContainer.AddThemeConstantOverride("margin_top", topMargin - (int)(_layoutSetup.offset.X * multiplier.Y));
+                    if (_layoutSetup.offset.Y > 0)
+                        marginContainer.AddThemeConstantOverride("margin_bottom", bottomMargin - (int)(_layoutSetup.offset.Y * multiplier.Y));
+                    if (_layoutSetup.offset.Z > 0)
+                        marginContainer.AddThemeConstantOverride("margin_left", leftMargin - (int)(_layoutSetup.offset.Z * multiplier.X));
+                    if (_layoutSetup.offset.W > 0)
+                        marginContainer.AddThemeConstantOverride("margin_right", rightMargin - (int)(_layoutSetup.offset.W * multiplier.X));
+                }
             }
             else
             {
-                float referenceMultiplier = Screen.height / (float)_referenceResolution.y;
+                Vector2I screenSize = DisplayServer.WindowGetSize();
+                float referenceMultiplier = screenSize.Y / (float)_referenceResolution.Y;
                 Vector2 multiplier = _layoutSetup.offsetType switch
                 {
                     OffsetType.Percentage => _referenceResolution / 2,
-                    OffsetType.Pixel => Vector2.one * referenceMultiplier,
+                    OffsetType.Pixel => Vector2.One * referenceMultiplier,
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                _layoutGroup.padding.top = (int)(_layoutSetup.offset.x * multiplier.y);
-                _layoutGroup.padding.bottom = (int)(_layoutSetup.offset.y * multiplier.y);
-                _layoutGroup.padding.left = (int)(_layoutSetup.offset.z * multiplier.x);
-                _layoutGroup.padding.right = (int)(_layoutSetup.offset.w * multiplier.x);
+                if (_layoutGroup is MarginContainer marginContainer)
+                {
+                    marginContainer.AddThemeConstantOverride("margin_top", (int)(_layoutSetup.offset.X * multiplier.Y));
+                    marginContainer.AddThemeConstantOverride("margin_bottom", (int)(_layoutSetup.offset.Y * multiplier.Y));
+                    marginContainer.AddThemeConstantOverride("margin_left", (int)(_layoutSetup.offset.Z * multiplier.X));
+                    marginContainer.AddThemeConstantOverride("margin_right", (int)(_layoutSetup.offset.W * multiplier.X));
+                }
             }
-            _layoutGroup.spacing = _layoutSetup.spacing;
-            _layoutGroup.enabled = false;
-            _layoutGroup.enabled = true;
+
+            // Set separation for box containers
+            if (_layoutGroup is BoxContainer boxContainer)
+            {
+                boxContainer.AddThemeConstantOverride("separation", _layoutSetup.spacing);
+            }
+
+            // Force layout update
+            _layoutGroup.QueueRedraw();
         }
+
         public void RegisterWindow(WindowUI window)
         {
             _windows.Add(window);
@@ -129,7 +154,7 @@ namespace ChosenConcept.APFramework.UI.Layout
         }
         public void MoveWindowToIndex(WindowUI window, int index)
         {
-            window.transform.SetSiblingIndex(index);
+            _layoutGroup.MoveChild(window, index);
         }
     }
 }

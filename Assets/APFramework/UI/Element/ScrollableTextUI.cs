@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
-using UnityEngine;
 
 namespace ChosenConcept.APFramework.UI.Element
 {

@@ -1,15 +1,14 @@
 using System;
 using ChosenConcept.APFramework.UI.Utility;
 using Cysharp.Text;
-using TMPro;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public class WindowOutline : MonoBehaviour
+    public partial class WindowOutline : Node
     {
-        [SerializeField] TextMeshProUGUI _outline;
-        public TextMeshProUGUI outline => _outline;
+        [Export] RichTextLabel _outline;
+        public RichTextLabel outline => _outline;
         string _outlineText;
 
         public string outlineText
@@ -40,20 +39,20 @@ namespace ChosenConcept.APFramework.UI.Window
             }
         }
 
-        [SerializeField] bool _singleWindowOverride;
-        [SerializeField] bool _inFocus;
-        [SerializeField] bool _available = true;
-        [SerializeField] bool _inInput;
-        [SerializeField] bool _active;
-        [SerializeField] bool _hasOutline;
-        Coroutine _coroutine = null;
-        [SerializeField] Vector2Int _size;
-        [SerializeField] WindowOutlineDisplayStyle _displayStyle;
-        public string targetText => ZString.Format("Allocating {0}x{1}", _size.x, _size.y);
+        [Export] bool _singleWindowOverride;
+        [Export] bool _inFocus;
+        [Export] bool _available = true;
+        [Export] bool _inInput;
+        [Export] bool _active;
+        [Export] bool _hasOutline;
+        Tween _tween = null;
+        [Export] Vector2I _size;
+        [Export] WindowOutlineDisplayStyle _displayStyle;
+        public string targetText => ZString.Format("Allocating {0}x{1}", _size.X, _size.Y);
 
         public void SetOpacity(float alpha)
         {
-            _outline.color = new Color(1, 1, 1, Mathf.Clamp01(alpha));
+            _outline.Modulate = new Color(1, 1, 1, Mathf.Clamp(alpha, 0f, 1f));
         }
 
         public void SetOutline(int widthCount, int heightCount, WindowSetup setup, int titleOverride,
@@ -169,268 +168,268 @@ namespace ChosenConcept.APFramework.UI.Window
 
         string OutlineSets(int i, WindowThickenStyle thickenType = WindowThickenStyle.None,
             WindowLabelStyle labeled = WindowLabelStyle.None) => thickenType switch
-        {
-            WindowThickenStyle.None => labeled switch
             {
-                WindowLabelStyle.None => i switch
+                WindowThickenStyle.None => labeled switch
                 {
-                    0 => "┌─┐",
-                    1 => "├─┤",
-                    2 => "│ │",
-                    3 => "└─┘",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "┌─┐",
+                        1 => "├─┤",
+                        2 => "│ │",
+                        3 => "└─┘",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄─┐",
+                        1 => "█─┤",
+                        2 => "█ │",
+                        3 => "▀─┘",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "┌─▄",
+                        1 => "├─█",
+                        2 => "│ █",
+                        3 => "└─▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
-                WindowLabelStyle.Left => i switch
+                WindowThickenStyle.Whole => labeled switch
                 {
-                    0 => "▄─┐",
-                    1 => "█─┤",
-                    2 => "█ │",
-                    3 => "▀─┘",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "╔═╗",
+                        1 => "╠═╣",
+                        2 => "║ ║",
+                        3 => "╚═╝",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄═╗",
+                        1 => "█═╣",
+                        2 => "█ ║",
+                        3 => "▀═╝",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "╔═▄",
+                        1 => "╠═█",
+                        2 => "║ █",
+                        3 => "╚═▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
-                WindowLabelStyle.Right => i switch
+                WindowThickenStyle.CornerOnly => labeled switch
                 {
-                    0 => "┌─▄",
-                    1 => "├─█",
-                    2 => "│ █",
-                    3 => "└─▀",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "╔─╗",
+                        1 => "╠─╣",
+                        2 => "│ │",
+                        3 => "╚─╝",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄─╗",
+                        1 => "█─╣",
+                        2 => "█ │",
+                        3 => "▀─╝",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "╔─▄",
+                        1 => "╠─█",
+                        2 => "│ █",
+                        3 => "╚─▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
                 _ => throw new NotImplementedException()
-            },
-            WindowThickenStyle.Whole => labeled switch
-            {
-                WindowLabelStyle.None => i switch
-                {
-                    0 => "╔═╗",
-                    1 => "╠═╣",
-                    2 => "║ ║",
-                    3 => "╚═╝",
-                    _ => "   "
-                },
-                WindowLabelStyle.Left => i switch
-                {
-                    0 => "▄═╗",
-                    1 => "█═╣",
-                    2 => "█ ║",
-                    3 => "▀═╝",
-                    _ => "   "
-                },
-                WindowLabelStyle.Right => i switch
-                {
-                    0 => "╔═▄",
-                    1 => "╠═█",
-                    2 => "║ █",
-                    3 => "╚═▀",
-                    _ => "   "
-                },
-                _ => throw new NotImplementedException()
-            },
-            WindowThickenStyle.CornerOnly => labeled switch
-            {
-                WindowLabelStyle.None => i switch
-                {
-                    0 => "╔─╗",
-                    1 => "╠─╣",
-                    2 => "│ │",
-                    3 => "╚─╝",
-                    _ => "   "
-                },
-                WindowLabelStyle.Left => i switch
-                {
-                    0 => "▄─╗",
-                    1 => "█─╣",
-                    2 => "█ │",
-                    3 => "▀─╝",
-                    _ => "   "
-                },
-                WindowLabelStyle.Right => i switch
-                {
-                    0 => "╔─▄",
-                    1 => "╠─█",
-                    2 => "│ █",
-                    3 => "╚─▀",
-                    _ => "   "
-                },
-                _ => throw new NotImplementedException()
-            },
-            _ => throw new NotImplementedException()
-        };
+            };
 
         string LowerLeftOutlineSets(int i, WindowThickenStyle thickenType = WindowThickenStyle.None,
             WindowLabelStyle labeled = WindowLabelStyle.None) => thickenType switch
-        {
-            WindowThickenStyle.None => labeled switch
             {
-                WindowLabelStyle.None => i switch
+                WindowThickenStyle.None => labeled switch
                 {
-                    0 => "┌  ",
-                    1 => "├  ",
-                    2 => "│  ",
-                    3 => "└─ ",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "┌  ",
+                        1 => "├  ",
+                        2 => "│  ",
+                        3 => "└─ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄  ",
+                        1 => "█  ",
+                        2 => "█  ",
+                        3 => "▀─ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "┌ ▄",
+                        1 => "├ █",
+                        2 => "│ █",
+                        3 => "└─▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
-                WindowLabelStyle.Left => i switch
+                WindowThickenStyle.Whole => labeled switch
                 {
-                    0 => "▄  ",
-                    1 => "█  ",
-                    2 => "█  ",
-                    3 => "▀─ ",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "╔  ",
+                        1 => "╠  ",
+                        2 => "║  ",
+                        3 => "╚═ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄  ",
+                        1 => "█  ",
+                        2 => "█  ",
+                        3 => "▀═ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "╔ ▄",
+                        1 => "╠ █",
+                        2 => "║ █",
+                        3 => "╚═▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
-                WindowLabelStyle.Right => i switch
+                WindowThickenStyle.CornerOnly => labeled switch
                 {
-                    0 => "┌ ▄",
-                    1 => "├ █",
-                    2 => "│ █",
-                    3 => "└─▀",
-                    _ => "   "
+                    WindowLabelStyle.None => i switch
+                    {
+                        0 => "╔  ",
+                        1 => "╠  ",
+                        2 => "│  ",
+                        3 => "╚─ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Left => i switch
+                    {
+                        0 => "▄  ",
+                        1 => "█  ",
+                        2 => "█  ",
+                        3 => "▀─ ",
+                        _ => "   "
+                    },
+                    WindowLabelStyle.Right => i switch
+                    {
+                        0 => "╔ ▄",
+                        1 => "╠ █",
+                        2 => "│ █",
+                        3 => "╚─▀",
+                        _ => "   "
+                    },
+                    _ => throw new NotImplementedException()
                 },
                 _ => throw new NotImplementedException()
-            },
-            WindowThickenStyle.Whole => labeled switch
-            {
-                WindowLabelStyle.None => i switch
-                {
-                    0 => "╔  ",
-                    1 => "╠  ",
-                    2 => "║  ",
-                    3 => "╚═ ",
-                    _ => "   "
-                },
-                WindowLabelStyle.Left => i switch
-                {
-                    0 => "▄  ",
-                    1 => "█  ",
-                    2 => "█  ",
-                    3 => "▀═ ",
-                    _ => "   "
-                },
-                WindowLabelStyle.Right => i switch
-                {
-                    0 => "╔ ▄",
-                    1 => "╠ █",
-                    2 => "║ █",
-                    3 => "╚═▀",
-                    _ => "   "
-                },
-                _ => throw new NotImplementedException()
-            },
-            WindowThickenStyle.CornerOnly => labeled switch
-            {
-                WindowLabelStyle.None => i switch
-                {
-                    0 => "╔  ",
-                    1 => "╠  ",
-                    2 => "│  ",
-                    3 => "╚─ ",
-                    _ => "   "
-                },
-                WindowLabelStyle.Left => i switch
-                {
-                    0 => "▄  ",
-                    1 => "█  ",
-                    2 => "█  ",
-                    3 => "▀─ ",
-                    _ => "   "
-                },
-                WindowLabelStyle.Right => i switch
-                {
-                    0 => "╔ ▄",
-                    1 => "╠ █",
-                    2 => "│ █",
-                    3 => "╚─▀",
-                    _ => "   "
-                },
-                _ => throw new NotImplementedException()
-            },
-            _ => throw new NotImplementedException()
-        };
+            };
 
         string LeftLineSets(WindowThickenStyle thickenType = WindowThickenStyle.None,
             WindowLabelStyle labeled = WindowLabelStyle.None) => labeled switch
-        {
-            WindowLabelStyle.None => thickenType switch
             {
-                WindowThickenStyle.None => "│  ",
-                _ => "║  "
-            },
-            WindowLabelStyle.Left => "█  ",
-            WindowLabelStyle.Right => throw new NotImplementedException(),
-            _ => throw new NotImplementedException()
-        };
+                WindowLabelStyle.None => thickenType switch
+                {
+                    WindowThickenStyle.None => "│  ",
+                    _ => "║  "
+                },
+                WindowLabelStyle.Left => "█  ",
+                WindowLabelStyle.Right => throw new NotImplementedException(),
+                _ => throw new NotImplementedException()
+            };
 
         string RightLineSets(WindowThickenStyle thickenType = WindowThickenStyle.None,
             WindowLabelStyle labeled = WindowLabelStyle.None) => labeled switch
-        {
-            WindowLabelStyle.None => thickenType switch
             {
-                WindowThickenStyle.None => "  │",
-                _ => "  ║"
-            },
-            WindowLabelStyle.Left => "  █",
-            WindowLabelStyle.Right => throw new NotImplementedException(),
-            _ => throw new NotImplementedException()
-        };
+                WindowLabelStyle.None => thickenType switch
+                {
+                    WindowThickenStyle.None => "  │",
+                    _ => "  ║"
+                },
+                WindowLabelStyle.Left => "  █",
+                WindowLabelStyle.Right => throw new NotImplementedException(),
+                _ => throw new NotImplementedException()
+            };
 
         string CornerSets(int i, WindowThickenStyle thickenType = WindowThickenStyle.None,
             WindowLabelStyle labeled = WindowLabelStyle.None) => labeled switch
-        {
-            WindowLabelStyle.None => thickenType switch
             {
-                WindowThickenStyle.None => i switch
+                WindowLabelStyle.None => thickenType switch
                 {
-                    0 => "┌ ┐",
-                    3 => "└ ┘",
-                    _ => "   "
+                    WindowThickenStyle.None => i switch
+                    {
+                        0 => "┌ ┐",
+                        3 => "└ ┘",
+                        _ => "   "
+                    },
+                    _ => i switch
+                    {
+                        0 => "╔ ╗",
+                        3 => "╚ ╝",
+                        _ => "   "
+                    }
                 },
-                _ => i switch
+                WindowLabelStyle.Left => thickenType switch
                 {
-                    0 => "╔ ╗",
-                    3 => "╚ ╝",
-                    _ => "   "
-                }
-            },
-            WindowLabelStyle.Left => thickenType switch
-            {
-                WindowThickenStyle.None => i switch
-                {
-                    0 => "▄ ┐",
-                    1 => "█  ",
-                    2 => "█  ",
-                    3 => "▀ ┘",
-                    _ => "   "
+                    WindowThickenStyle.None => i switch
+                    {
+                        0 => "▄ ┐",
+                        1 => "█  ",
+                        2 => "█  ",
+                        3 => "▀ ┘",
+                        _ => "   "
+                    },
+                    _ => i switch
+                    {
+                        0 => "▄ ╗",
+                        1 => "█  ",
+                        2 => "█  ",
+                        3 => "▀ ╝",
+                        _ => "   "
+                    }
                 },
-                _ => i switch
+                WindowLabelStyle.Right => thickenType switch
                 {
-                    0 => "▄ ╗",
-                    1 => "█  ",
-                    2 => "█  ",
-                    3 => "▀ ╝",
-                    _ => "   "
-                }
-            },
-            WindowLabelStyle.Right => thickenType switch
-            {
-                WindowThickenStyle.None => i switch
-                {
-                    0 => "┌ ▄",
-                    1 => "  █",
-                    2 => "  █",
-                    3 => "└ ▀",
-                    _ => "   "
+                    WindowThickenStyle.None => i switch
+                    {
+                        0 => "┌ ▄",
+                        1 => "  █",
+                        2 => "  █",
+                        3 => "└ ▀",
+                        _ => "   "
+                    },
+                    _ => i switch
+                    {
+                        0 => "╔ ▄",
+                        1 => "  █",
+                        2 => "  █",
+                        3 => "╚ ▀",
+                        _ => "   "
+                    }
                 },
-                _ => i switch
-                {
-                    0 => "╔ ▄",
-                    1 => "  █",
-                    2 => "  █",
-                    3 => "╚ ▀",
-                    _ => "   "
-                }
-            },
-            _ => throw new NotImplementedException()
-        };
+                _ => throw new NotImplementedException()
+            };
 
         string LineFill(string set, int count)
         {
@@ -451,22 +450,22 @@ namespace ChosenConcept.APFramework.UI.Window
                 return 0f;
             if (active)
             {
-                if (_coroutine != null)
-                    StopCoroutine(_coroutine);
+                if (_tween != null)
+                    _tween.Kill();
                 SetOutlineText(outlineText);
-                // coroutine = StartCoroutine(StartupSequence());
+                // tween = CreateTween(); // Could add animation here if needed
                 return 0f;
             }
 
-            if (_coroutine != null)
-                StopCoroutine(_coroutine);
+            if (_tween != null)
+                _tween.Kill();
             SetOutlineText(string.Empty);
             return 0f;
         }
 
         void SetOutlineText(string text)
         {
-            _outline.SetText(text);
+            _outline.Text = text;
         }
 
         internal void SetFocusAndAvailable(bool singleWindowOverride, bool inFocus, bool available, bool inInput)

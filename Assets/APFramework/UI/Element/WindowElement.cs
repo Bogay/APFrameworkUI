@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
@@ -67,19 +67,19 @@ namespace ChosenConcept.APFramework.UI.Element
     public class WindowElement : IAvailabilitySyncTarget
     {
         protected IStringLabel _label;
-        [SerializeField] bool _showLabel = true;
-        [SerializeField] protected string _name;
-        [SerializeField] protected string _tag;
-        [SerializeField] protected string _labelCache;
-        [SerializeField] string _contentCache;
+        [Export] bool _showLabel = true;
+        [Export] protected string _name;
+        [Export] protected string _tag;
+        [Export] protected string _labelCache;
+        [Export] string _contentCache;
         protected IStringLabel _content;
-        [SerializeField] protected int _count;
-        [SerializeField] protected bool _flexible;
-        [SerializeField] protected bool _available = true;
-        [SerializeField] Vector2 _cachedPositionStart = Vector2.zero;
-        [SerializeField] Vector2 _cachedPositionEnd = Vector2.zero;
-        [SerializeField] Vector2Int _characterIndex = new(-1, -1);
-        [SerializeField] protected WindowUI _parentWindow;
+        [Export] protected int _count;
+        [Export] protected bool _flexible;
+        [Export] protected bool _available = true;
+        [Export] Vector2 _cachedPositionStart = Vector2.zero;
+        [Export] Vector2 _cachedPositionEnd = Vector2.zero;
+        [Export] Vector2Int _characterIndex = new(-1, -1);
+        [Export] protected WindowUI _parentWindow;
         Action _focusAction = null;
         Func<bool> _availabilityGetter = null;
         protected bool _inFocus;

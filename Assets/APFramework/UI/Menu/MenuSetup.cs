@@ -1,24 +1,24 @@
 using System;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [Serializable]
     public struct MenuSetup
     {
-        [SerializeField] bool _allowCycleWithinWindow;
-        [SerializeField] bool _allowCycleBetweenWindows;
-        [SerializeField] bool _allowCloseMenuWithCancelAction;
-        [SerializeField] MenuCloseOnClickBehavior _allowCloseOnClick;
-        [SerializeField] MenuResetOnOpenBehavior _resetOnOpen;
-        [SerializeField] bool _allowDraggingWithMouse;
-        [SerializeField] bool _allowNavigationOnOpen;
-        [SerializeField] float _menuOpenInputDelay;
-        [SerializeField] bool _singlePressOnly;
-        [SerializeField] float _holdNavigationDelay;
-        [SerializeField] float _holdNavigationInterval;
-        [SerializeField] float _holdNavigationSpeedUpInterval;
-        [SerializeField] float _functionStringLabelUpdateInterval;
+        [Export] bool _allowCycleWithinWindow;
+        [Export] bool _allowCycleBetweenWindows;
+        [Export] bool _allowCloseMenuWithCancelAction;
+        [Export] MenuCloseOnClickBehavior _allowCloseOnClick;
+        [Export] MenuResetOnOpenBehavior _resetOnOpen;
+        [Export] bool _allowDraggingWithMouse;
+        [Export] bool _allowNavigationOnOpen;
+        [Export] float _menuOpenInputDelay;
+        [Export] bool _singlePressOnly;
+        [Export] float _holdNavigationDelay;
+        [Export] float _holdNavigationInterval;
+        [Export] float _holdNavigationSpeedUpInterval;
+        [Export] float _functionStringLabelUpdateInterval;
 
         public bool allowCycleWithinWindow => _allowCycleWithinWindow;
         public bool allowCycleBetweenWindows => _allowCycleBetweenWindows;

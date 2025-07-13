@@ -1,26 +1,26 @@
 using System;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    [Serializable]
+    [System.Serializable]
     public struct WindowSetup
     {
-        [SerializeField] int _width;
-        [SerializeField] int _height;
-        [SerializeField] WindowTitleStyle _titleStyle;
-        [SerializeField] WindowOutlineStyle _outlineStyle;
-        [SerializeField] WindowOutlineDisplayStyle _outlineDisplayStyle;
-        [SerializeField] WindowThickenStyle _thickenStyle;
-        [SerializeField] WindowLabelStyle _labelStyle;
-        [SerializeField] WindowTransition _transitionIn;
-        [SerializeField] WindowTransition _transitionOut;
-        [SerializeField] float _fontSize;
-        [SerializeField] Color _backgroundColor;
-        [SerializeField] float _functionStringUpdateInterval;
-        [SerializeField]  bool _syncActiveValueAutomatically;
+        [Export] int _width;
+        [Export] int _height;
+        [Export] WindowTitleStyle _titleStyle;
+        [Export] WindowOutlineStyle _outlineStyle;
+        [Export] WindowOutlineDisplayStyle _outlineDisplayStyle;
+        [Export] WindowThickenStyle _thickenStyle;
+        [Export] WindowLabelStyle _labelStyle;
+        [Export] WindowTransition _transitionIn;
+        [Export] WindowTransition _transitionOut;
+        [Export] float _fontSize;
+        [Export] Color _backgroundColor;
+        [Export] float _functionStringUpdateInterval;
+        [Export] bool _syncActiveValueAutomatically;
         public bool syncActiveValueAutomatically => _syncActiveValueAutomatically;
-        public float functionStringUpdateInterval => _functionStringUpdateInterval; 
+        public float functionStringUpdateInterval => _functionStringUpdateInterval;
         public int width => _width;
         public int height => _height;
         public WindowTitleStyle titleStyle => _titleStyle;
@@ -45,11 +45,11 @@ namespace ChosenConcept.APFramework.UI.Window
             _transitionIn = WindowTransition.Glitch,
             _transitionOut = WindowTransition.Glitch,
             _fontSize = 30,
-            _backgroundColor = Color.clear,
+            _backgroundColor = Colors.Transparent,
             _functionStringUpdateInterval = 0,
             _syncActiveValueAutomatically = true
         };
-        
+
         public WindowSetup(WindowSetup setup)
         {
             _width = setup._width;

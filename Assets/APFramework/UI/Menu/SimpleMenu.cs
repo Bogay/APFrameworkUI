@@ -3,38 +3,37 @@ using System.Collections.Generic;
 using ChosenConcept.APFramework.UI.Element;
 using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Window;
-using UnityEngine;
-using Object = UnityEngine.Object;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [Serializable]
     public class SimpleMenu : IMenuInputTarget
     {
-        [Header("Debug View")] [SerializeField]
+        [Export]
         string _menuName;
 
-        [SerializeField] MenuSetup _menuSetup;
-        [SerializeField] MenuStyling _menuStyling;
-        [SerializeField] WindowUI _windowInstance;
-        [SerializeField] LayoutAlignment _layoutAlignmentInstance;
-        [SerializeField] bool _displayActive;
-        [SerializeField] bool _navigationActive;
-        [SerializeField] int _linkFrame = -1;
-        [SerializeField] float _nextNavigationUpdate = Mathf.Infinity;
-        [SerializeField] int _currentSelection = -1;
-        [SerializeField] float _holdStart = Mathf.Infinity;
-        [SerializeField] float _holdNavigationNext = Mathf.Infinity;
-        [SerializeField] Vector2 _move = Vector2.zero;
-        [SerializeField] Vector2 _mouseScroll = Vector2.zero;
-        [SerializeField] Vector2 _lastMousePosition = Vector2.negativeInfinity;
-        [SerializeField] bool _mouseSelectionTargetExists;
-        [SerializeField] bool _hoverOnDecrease;
-        [SerializeField] bool _hoverOnIncrease;
-        [SerializeField] bool _inElementInputMode;
-        [SerializeField] bool _selectionUpdated;
-        [SerializeField] bool _focused;
-        [SerializeField] bool _movingWindow;
+        [Export] MenuSetup _menuSetup;
+        [Export] MenuStyling _menuStyling;
+        [Export] WindowUI _windowInstance;
+        [Export] LayoutAlignment _layoutAlignmentInstance;
+        [Export] bool _displayActive;
+        [Export] bool _navigationActive;
+        [Export] int _linkFrame = -1;
+        [Export] float _nextNavigationUpdate = Mathf.Infinity;
+        [Export] int _currentSelection = -1;
+        [Export] float _holdStart = Mathf.Infinity;
+        [Export] float _holdNavigationNext = Mathf.Infinity;
+        [Export] Vector2 _move = Vector2.zero;
+        [Export] Vector2 _mouseScroll = Vector2.zero;
+        [Export] Vector2 _lastMousePosition = Vector2.negativeInfinity;
+        [Export] bool _mouseSelectionTargetExists;
+        [Export] bool _hoverOnDecrease;
+        [Export] bool _hoverOnIncrease;
+        [Export] bool _inElementInputMode;
+        [Export] bool _selectionUpdated;
+        [Export] bool _focused;
+        [Export] bool _movingWindow;
         Action _menuCloseAction;
 
         public bool canBeClosedByOutOfFocusClick =>
@@ -209,7 +208,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             // with shared instance, it is possible that another menu destroys the layout
             if (_layoutAlignmentInstance != null)
             {
-                Object.Destroy(_layoutAlignmentInstance.gameObject);
+                GD.QueueFree(_layoutAlignmentInstance);
                 _layoutAlignmentInstance = null;
             }
         }
@@ -799,8 +798,8 @@ namespace ChosenConcept.APFramework.UI.Menu
         bool SelectionAction(ISelectable selection)
         {
             UnlinkInput();
-            WindowManager.instance.GetSelectionInput(this,
-                selection.values, selection.activeCount);
+            // WindowManager.instance.GetSelectionInput(this,
+            //     selection.values, selection.activeCount);
             return true;
         }
 

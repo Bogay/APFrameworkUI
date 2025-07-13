@@ -1,30 +1,31 @@
-using UnityEngine;
-using UnityEngine.UI;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public class WindowBackground : MonoBehaviour
+    public partial class WindowBackground : Node
     {
-        [SerializeField] RawImage _background;
-        [SerializeField] Color _bgColor = Color.clear;
-        public RawImage background => _background;
+        [Export] TextureRect _background;
+        [Export] Color _bgColor = Colors.Transparent;
+        public TextureRect background => _background;
 
         internal void SetColor(Color color)
         {
             _bgColor = color;
         }
+
         public void SetColor(Color color, bool active)
         {
             _bgColor = color;
             if (!active)
                 return;
-            _background.color = _bgColor;
+            _background.Modulate = _bgColor;
         }
+
         internal void SetActive(bool v)
         {
-            if (_bgColor == Color.clear)
+            if (_bgColor == Colors.Transparent)
                 return;
-            _background.color = v ? _bgColor : Color.clear;
+            _background.Modulate = v ? _bgColor : Colors.Transparent;
         }
     }
 }

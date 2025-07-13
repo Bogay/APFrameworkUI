@@ -1,11 +1,10 @@
 using ChosenConcept.APFramework.UI.Utility;
 using Cysharp.Text;
-using TMPro;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public class WindowMask : MonoBehaviour
+    public partial class WindowMask : Node
     {
         enum FadeType
         {
@@ -15,34 +14,34 @@ namespace ChosenConcept.APFramework.UI.Window
             DamageGlitchVFX,
         }
 
-        [SerializeField] WindowTransition _windowTransitionIn = WindowTransition.Full;
-        [SerializeField] WindowTransition _windowTransitionOut = WindowTransition.FromLeftLagged;
-        [SerializeField] FadeType _currentFadeType = FadeType.FadeIn;
-        [SerializeField] TextMeshProUGUI _mask;
-        public TextMeshProUGUI mask => _mask;
+        [Export] WindowTransition _windowTransitionIn = WindowTransition.Full;
+        [Export] WindowTransition _windowTransitionOut = WindowTransition.FromLeftLagged;
+        [Export] FadeType _currentFadeType = FadeType.FadeIn;
+        [Export] RichTextLabel _mask;
+        public RichTextLabel mask => _mask;
         string _maskText = TextUtility.FADE_IN;
         float _maskAnimationStep = 0.005f;
         int[,] _maskIndex;
         string _maskString = TextUtility.FADE_IN;
         int _fillLine;
-        [SerializeField] int _widthCount;
-        [SerializeField] int _heightCount;
-        [SerializeField] float _nextUpdate = Mathf.Infinity;
-        [SerializeField] int _endStep;
-        [SerializeField] int _currentStep = -1;
-        [SerializeField] bool _initialized;
-        public bool needUpdate => _nextUpdate < Mathf.Infinity;
+        [Export] int _widthCount;
+        [Export] int _heightCount;
+        [Export] double _nextUpdate = Mathf.Inf;
+        [Export] int _endStep;
+        [Export] int _currentStep = -1;
+        [Export] bool _initialized;
+        public bool needUpdate => _nextUpdate < Mathf.Inf;
 
         public void Initialize()
         {
-            mask.color = Color.white * 1.5f;
+            mask.Modulate = Colors.White * 1.5f;
         }
 
         public void ContextUpdate()
         {
-            if (!_initialized || Time.unscaledTime < _nextUpdate || _currentStep == -1)
+            if (!_initialized || Time.GetUnixTimeFromSystem() < _nextUpdate || _currentStep == -1)
                 return;
-            _nextUpdate = Time.unscaledTime + _maskAnimationStep;
+            _nextUpdate = Time.GetUnixTimeFromSystem() + _maskAnimationStep;
             UpdateMaskIndex();
             SetMaskIndex();
             _currentStep++;
@@ -50,8 +49,8 @@ namespace ChosenConcept.APFramework.UI.Window
                 return;
             _endStep = 0;
             _currentStep = -1;
-            mask.SetText(string.Empty);
-            _nextUpdate = Mathf.Infinity;
+            mask.Text = string.Empty;
+            _nextUpdate = Mathf.Inf;
         }
 
         void UpdateMaskIndex()
@@ -63,25 +62,25 @@ namespace ChosenConcept.APFramework.UI.Window
                     switch (CurrentTransition)
                     {
                         case WindowTransition.Noise:
-                            _maskIndex[i, j] = Random.Range(0, TextUtility.FADE_IN.Length - 1);
+                            _maskIndex[i, j] = GD.RandRange(0, TextUtility.FADE_IN.Length - 1);
                             break;
                         case WindowTransition.Glitch:
-                            if (Random.value > 0.5f)
+                            if (GD.Randf() > 0.5f)
                                 _maskIndex[i, j] +=
-                                    Mathf.FloorToInt(Time.unscaledDeltaTime / _maskAnimationStep);
+                                    Mathf.FloorToInt(GetProcessDeltaTime() / _maskAnimationStep);
                             break;
                         case WindowTransition.DamageGlitch:
-                            if (Random.value > 0.5f)
+                            if (GD.Randf() > 0.5f)
                                 _maskIndex[i, j] +=
-                                    Mathf.FloorToInt(Time.unscaledDeltaTime / _maskAnimationStep);
+                                    Mathf.FloorToInt(GetProcessDeltaTime() / _maskAnimationStep);
                             break;
                         case WindowTransition.Random:
-                            if (Random.value > 0.25f)
-                                _maskIndex[i, j] += Mathf.FloorToInt(Random.Range(1, TextUtility.FADE_IN.Length - 1) *
-                                    Time.unscaledDeltaTime / _maskAnimationStep);
+                            if (GD.Randf() > 0.25f)
+                                _maskIndex[i, j] += Mathf.FloorToInt(GD.RandRange(1, TextUtility.FADE_IN.Length - 1) *
+                                    GetProcessDeltaTime() / _maskAnimationStep);
                             break;
                         default:
-                            _maskIndex[i, j] += Mathf.FloorToInt(Time.unscaledDeltaTime / _maskAnimationStep);
+                            _maskIndex[i, j] += Mathf.FloorToInt(GetProcessDeltaTime() / _maskAnimationStep);
                             break;
                     }
                 }
@@ -118,7 +117,7 @@ namespace ChosenConcept.APFramework.UI.Window
                     windowStringBuilder.Append(TextUtility.LineBreaker);
                 }
 
-                mask.SetText(windowStringBuilder);
+                mask.Text = windowStringBuilder.ToString();
             }
         }
 
@@ -175,7 +174,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         float SetupTransition(WindowTransition transitionSetup, bool toSyncGameObject = false)
         {
-            _nextUpdate = Mathf.NegativeInfinity;
+            _nextUpdate = Mathf.NegInf;
             _currentStep = 0;
             int counter = 0;
             switch (transitionSetup)
@@ -185,7 +184,7 @@ namespace ChosenConcept.APFramework.UI.Window
                     {
                         for (int i = 0; i < _maskIndex.GetLength(0); i++)
                         {
-                            _maskIndex[i, j] = Random.Range(0, TextUtility.FADE_IN.Length - 1);
+                            _maskIndex[i, j] = GD.RandRange(0, TextUtility.FADE_IN.Length - 1);
                         }
                     }
 
@@ -272,8 +271,8 @@ namespace ChosenConcept.APFramework.UI.Window
                     {
                         for (int i = 0; i < _maskIndex.GetLength(0); i++)
                         {
-                            if (Random.value > 0.8f)
-                                _maskIndex[i, j] = Random.Range(0, TextUtility.FADE_IN.Length - 1);
+                            if (GD.Randf() > 0.8f)
+                                _maskIndex[i, j] = GD.RandRange(0, TextUtility.FADE_IN.Length - 1);
                             else
                                 _maskIndex[i, j] = TextUtility.FADE_IN.Length - 1;
                         }
@@ -286,8 +285,8 @@ namespace ChosenConcept.APFramework.UI.Window
                     {
                         for (int i = 0; i < _maskIndex.GetLength(0); i++)
                         {
-                            if (Random.value > 0.95f)
-                                _maskIndex[i, j] = Random.Range(0, TextUtility.FADE_IN.Length - 1);
+                            if (GD.Randf() > 0.95f)
+                                _maskIndex[i, j] = GD.RandRange(0, TextUtility.FADE_IN.Length - 1);
                         }
                     }
 
@@ -305,19 +304,19 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (active)
             {
-                mask.SetText(_maskText);
-                _nextUpdate = Mathf.NegativeInfinity;
+                mask.Text = _maskText;
+                _nextUpdate = Mathf.NegInf;
             }
             else
             {
-                mask.SetText(string.Empty);
-                _nextUpdate = Mathf.Infinity;
+                mask.Text = string.Empty;
+                _nextUpdate = Mathf.Inf;
             }
         }
 
         public void SetColor(Color color)
         {
-            mask.color = color;
+            mask.Modulate = color;
         }
 
 

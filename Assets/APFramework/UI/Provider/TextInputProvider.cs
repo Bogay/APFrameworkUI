@@ -1,14 +1,12 @@
 using ChosenConcept.APFramework.UI.Element;
 using ChosenConcept.APFramework.UI.Menu;
-using UnityEngine;
-using TMPro;
-using UnityEngine.InputSystem;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Provider
 {
-    public class TextInputProvider : MonoBehaviour, IMenuInputTarget
+    public partial class TextInputProvider : Node, IMenuInputTarget
     {
-        [SerializeField] TMP_InputField _inputField;
+        [Export] LineEdit _inputField;
         IMenuInputTarget _target;
         TextInputUI _textInputUI;
         string _originalText = string.Empty;
@@ -30,16 +28,14 @@ namespace ChosenConcept.APFramework.UI.Provider
             WindowManager.instance.LinkInputTarget(null);
 
             // show the text UI
-            _inputField.text = text.inputContent;
-            _inputField.gameObject.SetActive(true);
-            _inputField.onValueChanged.AddListener(OnValueChanged);
-            _inputField.onSubmit.AddListener(OnSubmit);
-            _inputField.onTextSelection.AddListener(OnTextSelection);
-            _inputField.onEndTextSelection.AddListener(OnEndTextSelection);
+            _inputField.Text = text.inputContent;
+            _inputField.Visible = true;
+            _inputField.TextChanged += OnValueChanged;
+            _inputField.TextSubmitted += OnSubmit;
 
-            // focus on Unity's text UI
-            _inputField.ActivateInputField();
-            _textInputUI.SetCaretPosition(_inputField.caretPosition);
+            // focus on Godot's text UI
+            _inputField.GrabFocus();
+            _textInputUI.SetCaretPosition(_inputField.CaretColumn);
 #if AUTOPANIC_STEAMWORK
         bool success = GameContext.platform.steam.ShowGamepadTextInput(this,
             GameContext.localization.GetLocalizedValue(text.rawContent),
@@ -50,24 +46,14 @@ namespace ChosenConcept.APFramework.UI.Provider
             WindowManager.instance.LinkInputTarget(this);
         }
 
-        void OnEndTextSelection(string arg0, int arg1, int arg2)
-        {
-            _textInputUI.SetSelectionRange(0, 0);
-        }
-
-        void OnTextSelection(string arg0, int arg1, int arg2)
-        {
-            _textInputUI.SetSelectionRange(arg1, arg2);
-        }
-
         // XXX: to don't use Update
-        void Update()
+        public override void _Process(double delta)
         {
             if (_textInputUI == null)
                 return;
-            _textInputUI.SetCaretPosition(_inputField.caretPosition);
+            _textInputUI.SetCaretPosition(_inputField.CaretColumn);
             // This naive solution is required because InputSystem isn't triggered properly
-            if (Keyboard.current.tabKey.wasPressedThisFrame)
+            if (Input.IsActionJustPressed("ui_tab"))
                 TriggerAutoComplete();
         }
 
@@ -79,36 +65,34 @@ namespace ChosenConcept.APFramework.UI.Provider
         void OnValueChanged(string value)
         {
             _textInputUI.SetActiveInputContent(value);
-            _textInputUI.SetCaretPosition(_inputField.caretPosition);
+            _textInputUI.SetCaretPosition(_inputField.CaretColumn);
             _textInputUI.SetSelectionRange(0, 0);
         }
 
         void CompleteInput()
         {
             _active = false;
-            _inputField.onValueChanged.RemoveAllListeners();
-            _inputField.onSubmit.RemoveAllListeners();
-            _inputField.onTextSelection.RemoveAllListeners();
-            _inputField.onEndTextSelection.RemoveAllListeners();
+            _inputField.TextChanged -= OnValueChanged;
+            _inputField.TextSubmitted -= OnSubmit;
 
-            // remove focus from Unity's text UI
-            _inputField.DeactivateInputField();
+            // remove focus from Godot's text UI
+            _inputField.ReleaseFocus();
 
             // close the text UI
-            _inputField.gameObject.SetActive(false);
+            _inputField.Visible = false;
 
             // give back the input to the target
             WindowManager.instance.LinkInputTarget(null);
-            _target.SetTextInput(_inputField.text);
+            _target.SetTextInput(_inputField.Text);
             _target = null;
             _textInputUI = null;
         }
 
         public void SetTextAndConfirm(string submittedText)
         {
-            _inputField.text = submittedText;
+            _inputField.Text = submittedText;
             _textInputUI.SetActiveInputContent(submittedText);
-            _textInputUI.SetCaretPosition(_inputField.caretPosition);
+            _textInputUI.SetCaretPosition(_inputField.CaretColumn);
             _textInputUI.SetSelectionRange(0, 0);
             CompleteInput();
         }
@@ -122,8 +106,8 @@ namespace ChosenConcept.APFramework.UI.Provider
         {
             if (_textInputUI.TriggerAutoComplete())
             {
-                _inputField.text = _textInputUI.inputContent;
-                _inputField.MoveTextEnd(false);
+                _inputField.Text = _textInputUI.inputContent;
+                _inputField.CaretColumn = _inputField.Text.Length;
             }
         }
 

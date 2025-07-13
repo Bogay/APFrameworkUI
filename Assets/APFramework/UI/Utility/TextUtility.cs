@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using UnityEngine;
-using Unity.Burst;
 using Cysharp.Text;
 
 namespace ChosenConcept.APFramework.UI.Utility

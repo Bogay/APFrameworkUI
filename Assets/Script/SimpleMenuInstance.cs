@@ -3,15 +3,15 @@ using ChosenConcept.APFramework.UI;
 using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Menu;
 using ChosenConcept.APFramework.UI.Window;
-using UnityEngine;
+using Godot;
 
-public class SimpleMenuInstance : MonoBehaviour
+public partial class SimpleMenuInstance : Node
 {
-    [SerializeField] List<LayoutSetup> _layoutSetups = new();
-    [SerializeField] List<SimpleMenu> _simpleMenus = new();
+    [Export] List<LayoutSetup> _layoutSetups = new();
+    [Export] List<SimpleMenu> _simpleMenus = new();
     bool _active;
 
-    void Start()
+    public override void _Ready()
     {
         int i = 0;
         foreach (LayoutSetup layout in _layoutSetups)
@@ -25,14 +25,14 @@ public class SimpleMenuInstance : MonoBehaviour
                 .SetChoiceByValue(new List<int> { 1, 2, 3 });
             menu.AddSlider<int>("slider")
                 .SetChoiceByValue(new[] { 0, 1, 2, 3 })
-                .SetAction(x => Debug.Log(x));
+                .SetAction(x => GD.Print(x));
             menu.AddButton("close", () => menu.CloseMenu());
             WindowManager.instance.RegisterMenu(menu);
             i++;
         }
     }
 
-    void Update()
+    public override void _Process(double delta)
     {
         if (!_active)
             return;

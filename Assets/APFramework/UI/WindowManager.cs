@@ -7,42 +7,39 @@ using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Menu;
 using ChosenConcept.APFramework.UI.Provider;
 using ChosenConcept.APFramework.UI.Window;
-using UnityEngine;
-using UnityEngine.UI;
-using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI
 {
-    public class WindowManager : MonoBehaviour, IMenuInputTarget
+    public partial class WindowManager : Node, IMenuInputTarget
     {
         static WindowManager _instance;
-        public static WindowManager instance => _instance ??= FindAnyObjectByType<WindowManager>();
-        [SerializeField] WindowUI _windowTemplate;
-        [SerializeField] Canvas _layerTemplate;
-        [SerializeField] GameObject _layoutTemplate;
-        [SerializeField] RawImage _backgroundTemplate;
-        [SerializeField] TextInputProvider _textInputProvider;
-        [SerializeField] SelectionProvider _selectionProvider;
-        [SerializeField] ConfirmationProvider _confirmationProvider;
-        [SerializeField] ContextMenuProvider _contextMenuProvider;
-        [SerializeField] Camera _interfaceCamera;
-        [SerializeField] List<WindowUI> _windows = new();
-        [SerializeField] List<CompositeMenuMono> _compositeMenuMonos = new();
-        [SerializeField] List<SimpleMenu> _simpleMenus = new();
-        [SerializeField] List<LayoutAlignment> _layoutAlignments = new();
-        [SerializeField] Vector2 _lastMousePosition = Vector2.negativeInfinity;
-        [SerializeField] RenderMode _overlayMode = RenderMode.ScreenSpaceOverlay;
-        Dictionary<MenuLayer, Canvas> _layers = new();
-        Dictionary<MenuLayer, Canvas> _backgroundLayers = new();
+        public static WindowManager instance => _instance ??= GetViewport().GetNode<WindowManager>("WindowManager");
+
+        [Export] WindowUI _windowTemplate;
+        [Export] CanvasLayer _layerTemplate;
+        [Export] Control _layoutTemplate;
+        [Export] TextureRect _backgroundTemplate;
+        [Export] TextInputProvider _textInputProvider;
+        [Export] SelectionProvider _selectionProvider;
+        // [Export] ConfirmationProvider _confirmationProvider;
+        // [Export] ContextMenuProvider _contextMenuProvider;
+        [Export] Camera2D _interfaceCamera;
+        [Export] List<WindowUI> _windows = new();
+        [Export] List<SimpleMenu> _simpleMenus = new();
+        [Export] List<LayoutAlignment> _layoutAlignments = new();
+        [Export] Vector2 _lastMousePosition = Vector2.Inf * -1;
+        Dictionary<MenuLayer, CanvasLayer> _layers = new();
+        Dictionary<MenuLayer, CanvasLayer> _backgroundLayers = new();
         IMenuInputTarget _activeMenuTarget;
         IInputProvider _inputProvider;
-        Vector2Int _lastResolution = Vector2Int.zero;
-        public IInputProvider inputProvider => _inputProvider;
-        public RenderMode overlayMode => _overlayMode;
+        Vector2I _lastResolution = Vector2I.Zero;
 
-        public bool providerActive => _selectionProvider.active || _textInputProvider.active ||
-                                      _confirmationProvider.active ||
-                                      _contextMenuProvider.active;
+        public IInputProvider inputProvider => _inputProvider;
+
+        // public bool providerActive => _selectionProvider.active || _textInputProvider.active ||
+        //   _confirmationProvider.active ||
+        //   _contextMenuProvider.active;
 
 
         public void EnableGlobalVisibility(bool enable)
@@ -55,12 +52,12 @@ namespace ChosenConcept.APFramework.UI
                 simpleMenu.SetOpacity(opacity);
             }
 
-            foreach (CompositeMenuMono compositeMenuMono in _compositeMenuMonos)
-            {
-                if (!compositeMenuMono.isDisplayActive)
-                    continue;
-                compositeMenuMono.SetOpacity(opacity);
-            }
+            // foreach (CompositeMenuMono compositeMenuMono in _compositeMenuMonos)
+            // {
+            //     if (!compositeMenuMono.isDisplayActive)
+            //         continue;
+            //     compositeMenuMono.SetOpacity(opacity);
+            // }
         }
 
         public void LinkInputTarget(IMenuInputTarget menuInputTarget)
@@ -74,16 +71,16 @@ namespace ChosenConcept.APFramework.UI
                 LinkInputTarget(null);
         }
 
-        public void GetContextMenu(List<string> choices, List<Action> actions, Vector2 position, Action onClose)
-        {
-            EnableGlobalVisibility(false);
-            _contextMenuProvider.SetupMenu(choices, actions, position, onClose);
-        }
+        // public void GetContextMenu(List<string> choices, List<Action> actions, Vector2 position, Action onClose)
+        // {
+        //     EnableGlobalVisibility(false);
+        //     _contextMenuProvider.SetupMenu(choices, actions, position, onClose);
+        // }
 
-        public void EndContextMenu()
-        {
-            EnableGlobalVisibility(true);
-        }
+        // public void EndContextMenu()
+        // {
+        //     EnableGlobalVisibility(true);
+        // }
 
         public void GetTextInput(IMenuInputTarget sourceUI, TextInputUI text)
         {
@@ -105,10 +102,10 @@ namespace ChosenConcept.APFramework.UI
 
         void TriggerResolutionChange()
         {
-            foreach (CompositeMenuMono menu in _compositeMenuMonos)
-            {
-                menu.TriggerResolutionChange();
-            }
+            // foreach (CompositeMenuMono menu in _compositeMenuMonos)
+            // {
+            //     menu.TriggerResolutionChange();
+            // }
 
             foreach (SimpleMenu menu in _simpleMenus)
             {
@@ -118,23 +115,22 @@ namespace ChosenConcept.APFramework.UI
             ClearAllWindowLocation();
         }
 
-        void Awake()
+        public override void _Ready()
         {
             _instance ??= this;
             _inputProvider = new UnityInputProvider();
-            DontDestroyOnLoad(gameObject);
             _inputProvider.SetTarget(this);
             _inputProvider.EnableInput(true);
-            _contextMenuProvider.Initialize();
-            SetOverlayMode(_overlayMode);
+            // _contextMenuProvider.Initialize();
         }
 
-        void Update()
+        public override void _Process(double delta)
         {
             _inputProvider.Update();
-            if (_lastResolution.x != Screen.width || _lastResolution.y != Screen.height)
+            Vector2I currentResolution = new Vector2I(DisplayServer.WindowGetSize().X, DisplayServer.WindowGetSize().Y);
+            if (_lastResolution.X != currentResolution.X || _lastResolution.Y != currentResolution.Y)
             {
-                _lastResolution = new Vector2Int(Screen.width, Screen.height);
+                _lastResolution = currentResolution;
                 TriggerResolutionChange();
             }
 
@@ -143,21 +139,21 @@ namespace ChosenConcept.APFramework.UI
                 window.UpdateWindow();
             }
 
-            if (providerActive)
-            {
-                _confirmationProvider.UpdateMenu();
-                _contextMenuProvider.UpdateMenu();
-                _selectionProvider.UpdateMenu();
-                return;
-            }
+            // if (providerActive)
+            // {
+            //     _confirmationProvider.UpdateMenu();
+            //     _contextMenuProvider.UpdateMenu();
+            //     _selectionProvider.UpdateMenu();
+            //     return;
+            // }
 
-            // When any provider is active, disable interaction of menus
-            foreach (CompositeMenuMono system in _compositeMenuMonos)
-            {
-                if (!system.enabled)
-                    continue;
-                system.UpdateMenu();
-            }
+            // // When any provider is active, disable interaction of menus
+            // foreach (CompositeMenuMono system in _compositeMenuMonos)
+            // {
+            //     if (!system.ProcessMode.HasFlag(Node.ProcessModeEnum.Disabled))
+            //         continue;
+            //     system.UpdateMenu();
+            // }
 
             UpdateSimpleMenuMouseFocus();
 
@@ -177,11 +173,10 @@ namespace ChosenConcept.APFramework.UI
 
         void UpdateSimpleMenuMouseFocus()
         {
-            if (!_inputProvider.hasMouse)
+            Vector2 mousePosition = GetViewport().GetMousePosition();
+            if (_lastMousePosition == mousePosition)
                 return;
-            if (_lastMousePosition == _inputProvider.mousePosition)
-                return;
-            _lastMousePosition = _inputProvider.mousePosition;
+            _lastMousePosition = mousePosition;
             bool any = false;
             foreach (SimpleMenu x in _simpleMenus)
             {
@@ -193,53 +188,29 @@ namespace ChosenConcept.APFramework.UI
                 }
             }
 
-            if (_simpleMenus.Count == 0 ||
-                any)
+            if (_simpleMenus.Count == 0 || any)
                 return;
             foreach (SimpleMenu menu in _simpleMenus)
             {
                 if (!menu.isDisplayActive || !menu.isNavigationActive || !menu.windowInstance.canNavigate)
                     continue;
-                menu.SetFocused(menu.IsMouseInWindow(_inputProvider.mousePosition));
+                menu.SetFocused(menu.IsMouseInWindow(mousePosition));
             }
         }
 
-        public void SetOverlayMode(RenderMode mode)
+        public Vector2 UIBoundRetriever(Node2D windowTransform, Vector2 elementPosition)
         {
-            _overlayMode = mode;
-            foreach (Canvas canvas in _layers.Values)
-            {
-                canvas.renderMode = mode;
-            }
-
-            // foreach (RawImage background in blurBackgrounds)
-            // {
-            //     background.material = overlayMode ? transparentMaterial : blurMaterial;
-            // }
-            ClearAllWindowLocation();
-        }
-
-        public Vector2 UIBoundRetriever(Transform windowTransform, Vector3 elementPosition)
-        {
-            switch (_overlayMode)
-            {
-                case RenderMode.ScreenSpaceCamera:
-                    return RectTransformUtility.WorldToScreenPoint(_interfaceCamera,
-                        windowTransform.TransformPoint(elementPosition));
-                case RenderMode.ScreenSpaceOverlay:
-                    Vector3 result = windowTransform.TransformPoint(elementPosition);
-                    return new Vector2(result.x, result.y);
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            // Convert to global coordinates and then to screen coordinates
+            Vector2 globalPos = windowTransform.ToGlobal(elementPosition);
+            return GetViewport().GetCamera2D().GetScreenCenterPosition() + globalPos;
         }
 
         public void WindowRefresh()
         {
-            foreach (CompositeMenuMono ui in _compositeMenuMonos)
-            {
-                ui.RefreshWindows();
-            }
+            // foreach (CompositeMenuMono ui in _compositeMenuMonos)
+            // {
+            //     ui.RefreshWindows();
+            // }
 
             foreach (SimpleMenu menu in _simpleMenus)
             {
@@ -247,15 +218,15 @@ namespace ChosenConcept.APFramework.UI
             }
         }
 
-        public Canvas InstantiateBackgroundLayer(MenuLayer layer)
+        public CanvasLayer InstantiateBackgroundLayer(MenuLayer layer)
         {
-            if (!_backgroundLayers.TryGetValue(layer, out Canvas existingLayer))
+            if (!_backgroundLayers.TryGetValue(layer, out CanvasLayer existingLayer))
             {
-                Canvas newLayer = Instantiate(_layerTemplate, transform);
-                newLayer.sortingOrder = (int)layer * 2;
-                newLayer.name = ZString.Concat(layer, " BG");
-                newLayer.worldCamera = _interfaceCamera;
-                newLayer.gameObject.SetActive(true);
+                CanvasLayer newLayer = _layerTemplate.Duplicate() as CanvasLayer;
+                AddChild(newLayer);
+                newLayer.Layer = (int)layer * 2;
+                newLayer.Name = $"{layer} BG";
+                newLayer.Visible = true;
                 _backgroundLayers.Add(layer, newLayer);
                 return newLayer;
             }
@@ -263,15 +234,15 @@ namespace ChosenConcept.APFramework.UI
             return existingLayer;
         }
 
-        public Canvas InstantiateLayer(MenuLayer layer)
+        public CanvasLayer InstantiateLayer(MenuLayer layer)
         {
-            if (!_layers.TryGetValue(layer, out Canvas existingLayer))
+            if (!_layers.TryGetValue(layer, out CanvasLayer existingLayer))
             {
-                Canvas newLayer = Instantiate(_layerTemplate, transform);
-                newLayer.sortingOrder = (int)layer * 2 + 1;
-                newLayer.name = layer.ToString();
-                newLayer.worldCamera = _interfaceCamera;
-                newLayer.gameObject.SetActive(true);
+                CanvasLayer newLayer = _layerTemplate.Duplicate() as CanvasLayer;
+                AddChild(newLayer);
+                newLayer.Layer = (int)layer * 2 + 1;
+                newLayer.Name = layer.ToString();
+                newLayer.Visible = true;
                 _layers.Add(layer, newLayer);
                 return newLayer;
             }
@@ -281,45 +252,49 @@ namespace ChosenConcept.APFramework.UI
 
         public LayoutAlignment InstantiateLayout(LayoutSetup layoutSetup, string layoutName = "")
         {
-            Transform targetLayer = InstantiateLayer(layoutSetup.MenuLayer).transform;
-            GameObject newLayout = Instantiate(_layoutTemplate, targetLayer);
-            LayoutAlignment layoutAlignment = newLayout.AddComponent<LayoutAlignment>();
+            CanvasLayer targetLayer = InstantiateLayer(layoutSetup.MenuLayer);
+            Control newLayout = _layoutTemplate.Duplicate() as Control;
+            targetLayer.AddChild(newLayout);
+            LayoutAlignment layoutAlignment = new LayoutAlignment();
+            newLayout.AddChild(layoutAlignment);
             _layoutAlignments.Add(layoutAlignment);
-            HorizontalOrVerticalLayoutGroup layoutGroup = layoutSetup.windowDirection switch
+
+            Container layoutGroup = layoutSetup.windowDirection switch
             {
-                WindowDirection.Vertical => newLayout.AddComponent<VerticalLayoutGroup>(),
-                WindowDirection.Horizontal => newLayout.AddComponent<HorizontalLayoutGroup>(),
+                WindowDirection.Vertical => new VBoxContainer(),
+                WindowDirection.Horizontal => new HBoxContainer(),
                 _ => throw new NotImplementedException(),
             };
-            layoutGroup.childControlHeight = true;
-            layoutGroup.childControlWidth = true;
-            layoutGroup.childForceExpandHeight = false;
-            layoutGroup.childForceExpandWidth = false;
-            layoutGroup.childAlignment = layoutSetup.windowAlignment switch
+
+            newLayout.AddChild(layoutGroup);
+
+            // Convert Unity TextAnchor to Godot alignment
+            Control.GrowDirection growDirection = layoutSetup.windowAlignment switch
             {
-                WindowAlignment.UpperLeft => TextAnchor.UpperLeft,
-                WindowAlignment.UpperCenter => TextAnchor.UpperCenter,
-                WindowAlignment.UpperRight => TextAnchor.UpperRight,
-                WindowAlignment.MiddleLeft => TextAnchor.MiddleLeft,
-                WindowAlignment.MiddleCenter => TextAnchor.MiddleCenter,
-                WindowAlignment.MiddleRight => TextAnchor.MiddleRight,
-                WindowAlignment.LowerLeft => TextAnchor.LowerLeft,
-                WindowAlignment.LowerCenter => TextAnchor.LowerCenter,
-                WindowAlignment.LowerRight => TextAnchor.LowerRight,
+                WindowAlignment.UpperLeft => Control.GrowDirection.End,
+                WindowAlignment.UpperCenter => Control.GrowDirection.End,
+                WindowAlignment.UpperRight => Control.GrowDirection.End,
+                WindowAlignment.MiddleLeft => Control.GrowDirection.Both,
+                WindowAlignment.MiddleCenter => Control.GrowDirection.Both,
+                WindowAlignment.MiddleRight => Control.GrowDirection.Both,
+                WindowAlignment.LowerLeft => Control.GrowDirection.Begin,
+                WindowAlignment.LowerCenter => Control.GrowDirection.Begin,
+                WindowAlignment.LowerRight => Control.GrowDirection.Begin,
                 _ => throw new System.NotImplementedException(),
             };
+
             layoutAlignment.Initialize(layoutGroup, layoutSetup);
             if (layoutName != string.Empty)
-                newLayout.name = layoutName;
-            newLayout.SetActive(true);
-            newLayout.transform.localScale = Vector3.one;
+                newLayout.Name = layoutName;
+            newLayout.Visible = true;
+            newLayout.Scale = Vector2.One;
             return layoutAlignment;
         }
 
         public void DelistWindow(WindowUI window)
         {
             _windows.Remove(window);
-            Destroy(window.gameObject);
+            window.QueueFree();
         }
 
         public WindowUI NewWindow(string windowName, LayoutSetup layoutSetup, WindowSetup setup,
@@ -328,7 +303,7 @@ namespace ChosenConcept.APFramework.UI
             WindowUI window = InstantiateWindow(windowName, layoutSetup);
             window.Initialize(windowName, menuName, setup);
             _windows.Add(window);
-            window.gameObject.SetActive(false);
+            window.Visible = false;
             return window;
         }
 
@@ -338,7 +313,7 @@ namespace ChosenConcept.APFramework.UI
             WindowUI window = InstantiateWindow(windowName, layout);
             window.Initialize(windowName, menuName, setup);
             _windows.Add(window);
-            window.gameObject.SetActive(false);
+            window.Visible = false;
             return window;
         }
 
@@ -346,31 +321,33 @@ namespace ChosenConcept.APFramework.UI
         WindowUI InstantiateWindow(string windowName, LayoutSetup layoutSetup)
         {
             LayoutAlignment layout = InstantiateLayout(layoutSetup);
-            WindowUI window = Instantiate(_windowTemplate, layout.transform);
+            WindowUI window = _windowTemplate.Duplicate() as WindowUI;
+            layout.AddChild(window);
             layout.RegisterWindow(window);
-            layout.gameObject.name = windowName;
-            window.gameObject.name = windowName;
-            window.transform.localScale = Vector3.one;
+            layout.Name = windowName;
+            window.Name = windowName;
+            window.Scale = Vector2.One;
             window.RegisterLayout(layout);
             return window;
         }
 
         WindowUI InstantiateWindow(string windowName, LayoutAlignment layout)
         {
-            WindowUI window = Instantiate(_windowTemplate, layout.transform);
+            WindowUI window = _windowTemplate.Duplicate() as WindowUI;
+            layout.AddChild(window);
             layout.RegisterWindow(window);
-            window.gameObject.name = windowName;
-            window.transform.localScale = Vector3.one;
+            window.Name = windowName;
+            window.Scale = Vector2.One;
             window.RegisterLayout(layout);
             return window;
         }
 
-        public void RegisterMenu(CompositeMenuMono menu)
-        {
-            if (_compositeMenuMonos.Contains(menu))
-                return;
-            _compositeMenuMonos.Add(menu);
-        }
+        // public void RegisterMenu(CompositeMenuMono menu)
+        // {
+        //     if (_compositeMenuMonos.Contains(menu))
+        //         return;
+        //     _compositeMenuMonos.Add(menu);
+        // }
 
         public void RegisterMenu(SimpleMenu menu)
         {
@@ -381,11 +358,11 @@ namespace ChosenConcept.APFramework.UI
 
         public void ClearAllWindowLocation()
         {
-            float inputDelayDuration = Screen.fullScreenMode is FullScreenMode.ExclusiveFullScreen ? 1.5f : 0.5f;
-            foreach (CompositeMenuMono menu in _compositeMenuMonos)
-            {
-                menu.ClearWindowLocation(inputDelayDuration);
-            }
+            float inputDelayDuration = DisplayServer.WindowGetMode() == DisplayServer.WindowMode.ExclusiveFullscreen ? 1.5f : 0.5f;
+            // foreach (CompositeMenuMono menu in _compositeMenuMonos)
+            // {
+            //     menu.ClearWindowLocation(inputDelayDuration);
+            // }
 
             foreach (SimpleMenu menu in _simpleMenus)
             {
@@ -393,23 +370,23 @@ namespace ChosenConcept.APFramework.UI
             }
         }
 
-        public void GetConfirm(string title, string message, string confirm,
-            string cancel = null, Action onConfirm = null, Action onCancel = null,
-            ConfirmationDefaultChoice defaultChoice = ConfirmationDefaultChoice.None)
-        {
-            EnableGlobalVisibility(false);
+        // public void GetConfirm(string title, string message, string confirm,
+        //     string cancel = null, Action onConfirm = null, Action onCancel = null,
+        //     ConfirmationDefaultChoice defaultChoice = ConfirmationDefaultChoice.None)
+        // {
+        //     EnableGlobalVisibility(false);
 
-            _confirmationProvider.GetConfirm(title, message, confirm, cancel, onConfirm, onCancel,
-                defaultChoice);
-        }
+        //     _confirmationProvider.GetConfirm(title, message, confirm, cancel, onConfirm, onCancel,
+        //         defaultChoice);
+        // }
 
-        public void GetConfirm(string title, string message, string confirm,
-            Action onConfirm = null, ConfirmationDefaultChoice defaultChoice = ConfirmationDefaultChoice.None)
-        {
-            EnableGlobalVisibility(false);
+        // public void GetConfirm(string title, string message, string confirm,
+        //     Action onConfirm = null, ConfirmationDefaultChoice defaultChoice = ConfirmationDefaultChoice.None)
+        // {
+        //     EnableGlobalVisibility(false);
 
-            _confirmationProvider.GetConfirm(title, message, confirm, null, onConfirm, null, defaultChoice);
-        }
+        //     _confirmationProvider.GetConfirm(title, message, confirm, null, onConfirm, null, defaultChoice);
+        // }
 
         public void EndConfirm()
         {
@@ -495,7 +472,7 @@ namespace ChosenConcept.APFramework.UI
                 return;
             }
 
-            if (_simpleMenus.Count == 0 || Mathf.Approximately(0, move.sqrMagnitude))
+            if (_simpleMenus.Count == 0 || Mathf.IsZeroApprox(move.LengthSquared()))
                 return;
             foreach (SimpleMenu menu in _simpleMenus)
             {
@@ -554,13 +531,13 @@ namespace ChosenConcept.APFramework.UI
 
         public T GetMenu<T>()
         {
-            foreach (CompositeMenuMono system in _compositeMenuMonos)
-            {
-                if (system is T t)
-                {
-                    return t;
-                }
-            }
+            // foreach (CompositeMenuMono system in _compositeMenuMonos)
+            // {
+            //     if (system is T t)
+            //     {
+            //         return t;
+            //     }
+            // }
 
             throw new Exception($"Menu {typeof(T)} not found");
         }
@@ -573,10 +550,10 @@ namespace ChosenConcept.APFramework.UI
                 tags.AddRange(simpleMenu.ExportLocalizationTag());
             }
 
-            foreach (CompositeMenuMono system in _compositeMenuMonos)
-            {
-                tags.AddRange(system.ExportLocalizationTag());
-            }
+            // foreach (CompositeMenuMono system in _compositeMenuMonos)
+            // {
+            //     tags.AddRange(system.ExportLocalizationTag());
+            // }
 
             return string.Join("\n", tags);
         }

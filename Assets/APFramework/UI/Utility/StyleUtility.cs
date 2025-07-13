@@ -1,17 +1,17 @@
 using Cysharp.Text;
-using UnityEngine;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Utility
 {
     public class StyleUtility
     {
-        public static Color selected = new Color32(10, 239, 254, 255);
-        public static Color disableSelected = new Color32(0, 90, 125, 255);
-        public static Color disabled = new Color32(100, 100, 100, 255);
+        public static Color selected = new Color(10f / 255f, 239f / 255f, 254f / 255f, 1f);
+        public static Color disableSelected = new Color(0f, 90f / 255f, 125f / 255f, 1f);
+        public static Color disabled = new Color(100f / 255f, 100f / 255f, 100f / 255f, 1f);
 
         public static string StringColored(string text, Color color)
         {
-            return ZString.Concat("<color=#", ColorUtility.ToHtmlStringRGBA(color), ">", text, "</color>");
+            return ZString.Concat("<color=#", color.ToHtml(), ">", text, "</color>");
         }
 
         public static string StringColoredRange(string text, Color color, int min, int max)
@@ -46,12 +46,13 @@ namespace ChosenConcept.APFramework.UI.Utility
 
         public static Color DarkenColor(Color color, float percentage)
         {
-            Color.RGBToHSV(color, out float h, out float s, out float v);
-            return Color.HSVToRGB(h, s, v * Mathf.Clamp01(percentage));
+            float h, s, v;
+            color.ToHsv(out h, out s, out v);
+            return Color.FromHsv(h, s, v * Mathf.Clamp(percentage, 0f, 1f));
         }
 
-        public static Color ClearColor(Color color) => new Color(color.r, color.g, color.b, 0);
-        public static Color FullColor(Color color) => new Color(color.r, color.g, color.b, 1);
-        public static Color AlphaColor(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
+        public static Color ClearColor(Color color) => new Color(color.R, color.G, color.B, 0);
+        public static Color FullColor(Color color) => new Color(color.R, color.G, color.B, 1);
+        public static Color AlphaColor(Color color, float alpha) => new Color(color.R, color.G, color.B, alpha);
     }
 }
