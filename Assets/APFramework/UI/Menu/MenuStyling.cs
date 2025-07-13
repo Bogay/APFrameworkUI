@@ -6,7 +6,8 @@ using Godot;
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [System.Serializable]
-    public struct MenuStyling
+    [GlobalClass]
+    public partial class MenuStyling : Resource
     {
         [Export] WindowSetup _windowSetup;
         [Export] LayoutSetup _layoutSetup;

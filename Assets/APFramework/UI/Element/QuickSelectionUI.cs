@@ -4,17 +4,20 @@ using System.Linq;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class QuickSelectionUI<T> : WindowElement<QuickSelectionUI<T>>, IQuickSelect, IValueSyncTarget
+    // TODO: support generic
+    [GlobalClass]
+    public partial class QuickSelectionUI : WindowElement, IQuickSelect, IValueSyncTarget
     {
         bool _canCycleBackward;
-        Action<T> _action;
+        Action<string> _action;
         List<string> _choiceListContentCache = new();
         List<IStringLabel> _choiceList = new();
-        List<T> _choiceValueList = new();
-        Func<T> _activeValueGetter;
+        List<string> _choiceValueList = new();
+        Func<string> _activeValueGetter;
 
         public List<string> choiceListContent
         {
@@ -75,7 +78,7 @@ namespace ChosenConcept.APFramework.UI.Element
         {
         }
 
-        public QuickSelectionUI<T> SetActiveValue(T value)
+        public QuickSelectionUI SetActiveValue(string value)
         {
             int index = _choiceValueList.IndexOf(value);
             if (index < 0)
@@ -90,7 +93,7 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> SetActiveValue(Func<T> valueGetter)
+        public QuickSelectionUI SetActiveValue(Func<string> valueGetter)
         {
             _activeValueGetter = valueGetter;
             int index = _choiceValueList.IndexOf(_activeValueGetter());
@@ -111,13 +114,13 @@ namespace ChosenConcept.APFramework.UI.Element
             this.count = count;
         }
 
-        public QuickSelectionUI<T> SetCanCycleBackward(bool canPrevious)
+        public QuickSelectionUI SetCanCycleBackward(bool canPrevious)
         {
             _canCycleBackward = canPrevious;
             return this;
         }
 
-        public QuickSelectionUI<T> SetAction(Action<T> action)
+        public QuickSelectionUI SetAction(Action<string> action)
         {
             _action = action;
             return this;
@@ -136,11 +139,11 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceValueList.Clear();
         }
 
-        public QuickSelectionUI<T> SetChoice(List<IStringLabel> choice, List<T> value)
+        public QuickSelectionUI SetChoice(List<IStringLabel> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -150,11 +153,11 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> SetChoice(List<string> choice, List<T> value)
+        public QuickSelectionUI SetChoice(List<string> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -167,10 +170,10 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> SetChoiceByValue(IEnumerable<T> value)
+        public QuickSelectionUI SetChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T item in value)
+            foreach (string item in value)
             {
                 AddChoice(item.ToString(), item);
             }
@@ -178,10 +181,10 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> SetLocalizedChoiceByValue(IEnumerable<T> value)
+        public QuickSelectionUI SetLocalizedChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T item in value)
+            foreach (string item in value)
             {
                 AddChoice(new LocalizedStringLabel(_tag, item.ToString()), item);
             }
@@ -189,7 +192,7 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> AddChoice(string choice, T value)
+        public QuickSelectionUI AddChoice(string choice, string value)
         {
             _choiceListContentCache.Clear();
             _choiceList.Add(new StringLabel(choice));
@@ -197,7 +200,7 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public QuickSelectionUI<T> AddChoice(IStringLabel choice, T value)
+        public QuickSelectionUI AddChoice(IStringLabel choice, string value)
         {
             _choiceListContentCache.Clear();
             _choiceList.Add(choice);
@@ -212,7 +215,7 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceValueList.RemoveAt(index);
         }
 
-        public void RemoveValue(T value)
+        public void RemoveValue(string value)
         {
             _choiceListContentCache.Clear();
             int index = _choiceValueList.IndexOf(value);

@@ -9,7 +9,7 @@ namespace ChosenConcept.APFramework.UI.Layout
     {
         [Export] Container _layoutGroup;
         [Export] LayoutSetup _layoutSetup;
-        [Export] List<WindowUI> _windows = new();
+        [Export] Godot.Collections.Array<WindowUI> _windows = new();
         static Vector2I _referenceResolution = new(1920, 1080);
 
         public void Initialize(Container layoutGroup, LayoutSetup layoutSetup)

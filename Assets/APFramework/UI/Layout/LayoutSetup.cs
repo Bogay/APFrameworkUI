@@ -3,8 +3,9 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Layout
 {
+    [GlobalClass]
     [System.Serializable]
-    public struct LayoutSetup
+    public partial class LayoutSetup : Resource
     {
         [Export] MenuLayer _menuLayer;
         [Export] WindowAlignment _windowAlignment;

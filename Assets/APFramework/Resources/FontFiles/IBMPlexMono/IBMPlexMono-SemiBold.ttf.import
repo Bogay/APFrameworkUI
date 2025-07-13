@@ -3,12 +3,11 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://cuqbodg6wmfhy"
-path="res://.godot/imported/IBMPlexMono-SemiBold.ttf-4d53add82190dca2c672a18b4dd8bbc2.fontdata"
+valid=false
 
 [deps]
 
 source_file="res://Assets/APFramework/Resources/FontFiles/IBMPlexMono/IBMPlexMono-SemiBold.ttf"
-dest_files=["res://.godot/imported/IBMPlexMono-SemiBold.ttf-4d53add82190dca2c672a18b4dd8bbc2.fontdata"]
 
 [params]
 

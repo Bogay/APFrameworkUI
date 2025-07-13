@@ -65,8 +65,8 @@ namespace ChosenConcept.APFramework.UI.Window
                 return;
             }
 
-            _size.x = widthCount;
-            _size.y = heightCount;
+            _size.X = widthCount;
+            _size.Y = heightCount;
             WindowThickenStyle thicken = setup.thickenStyle;
             int windowHeight = heightCount;
             // Setup First Line

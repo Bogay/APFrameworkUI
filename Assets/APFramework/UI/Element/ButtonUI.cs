@@ -2,10 +2,12 @@ using System;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class ButtonUI : WindowElement<ButtonUI>
+    [GlobalClass]
+    public partial class ButtonUI : WindowElement
     {
         bool _needConfirm;
         bool _awaitConfirm;

@@ -1,6 +1,7 @@
 using ChosenConcept.APFramework.UI.Element;
 using ChosenConcept.APFramework.UI.Menu;
 using Godot;
+using GodotInput = Godot.Input;
 
 namespace ChosenConcept.APFramework.UI.Provider
 {
@@ -53,7 +54,7 @@ namespace ChosenConcept.APFramework.UI.Provider
                 return;
             _textInputUI.SetCaretPosition(_inputField.CaretColumn);
             // This naive solution is required because InputSystem isn't triggered properly
-            if (Input.IsActionJustPressed("ui_tab"))
+            if (GodotInput.IsActionJustPressed("ui_tab"))
                 TriggerAutoComplete();
         }
 

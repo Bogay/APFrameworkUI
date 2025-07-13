@@ -1,6 +1,7 @@
 using ChosenConcept.APFramework.UI.Menu;
 using Godot;
 using System;
+using GodotInput = Godot.Input;
 
 namespace ChosenConcept.APFramework.UI.Input
 {
@@ -35,25 +36,25 @@ namespace ChosenConcept.APFramework.UI.Input
             Vector2 movement = Vector2.Zero;
 
             // Handle keyboard input
-            if (Input.IsActionPressed("move_up") || Input.IsKeyPressed(Key.W))
+            if (GodotInput.IsActionPressed("move_up") || GodotInput.IsKeyPressed(Key.W))
                 movement.Y = 1.0f;
-            if (Input.IsActionPressed("move_down") || Input.IsKeyPressed(Key.S))
+            if (GodotInput.IsActionPressed("move_down") || GodotInput.IsKeyPressed(Key.S))
                 movement.Y = -1.0f;
-            if (Input.IsActionPressed("move_left") || Input.IsKeyPressed(Key.A))
+            if (GodotInput.IsActionPressed("move_left") || GodotInput.IsKeyPressed(Key.A))
                 movement.X = -1.0f;
-            if (Input.IsActionPressed("move_right") || Input.IsKeyPressed(Key.D))
+            if (GodotInput.IsActionPressed("move_right") || GodotInput.IsKeyPressed(Key.D))
                 movement.X = 1.0f;
 
             // Handle gamepad input (if available)
-            Vector2 leftStick = Input.GetVector("move_left", "move_right", "move_up", "move_down");
+            Vector2 leftStick = GodotInput.GetVector("move_left", "move_right", "move_up", "move_down");
             if (leftStick.LengthSquared() > movement.LengthSquared())
                 movement = leftStick;
 
             // Handle confirm/cancel input
-            if (Input.IsActionJustPressed("ui_accept") || Input.IsKeyPressed(Key.Space) || Input.IsKeyPressed(Key.Enter))
+            if (GodotInput.IsActionJustPressed("ui_accept") || GodotInput.IsKeyPressed(Key.Space) || GodotInput.IsKeyPressed(Key.Enter))
                 _activeTarget?.OnConfirm();
 
-            if (Input.IsActionJustPressed("ui_cancel") || Input.IsKeyPressed(Key.Escape))
+            if (GodotInput.IsActionJustPressed("ui_cancel") || GodotInput.IsKeyPressed(Key.Escape))
                 _activeTarget?.OnCancel();
 
             // Handle mouse input
@@ -61,18 +62,18 @@ namespace ChosenConcept.APFramework.UI.Input
             _mouseDelta = currentMousePosition - _lastMousePosition;
             _lastMousePosition = currentMousePosition;
 
-            if (Input.IsActionJustPressed("mouse_left") || Input.IsMouseButtonPressed(MouseButton.Left))
+            if (GodotInput.IsActionJustPressed("mouse_left") || GodotInput.IsMouseButtonPressed(MouseButton.Left))
                 _activeTarget?.OnMouseConfirmPressed();
-            if (Input.IsActionJustReleased("mouse_left") || !Input.IsMouseButtonPressed(MouseButton.Left))
+            if (GodotInput.IsActionJustReleased("mouse_left") || !GodotInput.IsMouseButtonPressed(MouseButton.Left))
                 _activeTarget?.OnMouseConfirmReleased();
-            if (Input.IsActionJustPressed("mouse_right") || Input.IsMouseButtonPressed(MouseButton.Right))
+            if (GodotInput.IsActionJustPressed("mouse_right") || GodotInput.IsMouseButtonPressed(MouseButton.Right))
                 _activeTarget?.OnMouseCancel();
 
             // Handle scroll input
             Vector2 scrollDelta = Vector2.Zero;
-            if (Input.IsActionJustPressed("scroll_up"))
+            if (GodotInput.IsActionJustPressed("scroll_up"))
                 scrollDelta.Y = 1.0f;
-            if (Input.IsActionJustPressed("scroll_down"))
+            if (GodotInput.IsActionJustPressed("scroll_down"))
                 scrollDelta.Y = -1.0f;
 
             if (scrollDelta.LengthSquared() > 0)

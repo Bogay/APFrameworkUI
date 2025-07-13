@@ -1,3 +1,5 @@
+using Godot;
+
 namespace ChosenConcept.APFramework.UI.Menu
 {
     public interface IMenuInputTarget

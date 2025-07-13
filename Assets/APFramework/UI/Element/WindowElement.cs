@@ -7,64 +7,65 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class WindowElement<T> : WindowElement where T : WindowElement<T>
-    {
-        public WindowElement(string name, WindowUI parent) : base(name, parent)
-        {
-        }
+    // public class WindowElement<T> : WindowElement where T : WindowElement<T>
+    // {
+    //     public WindowElement(string name, WindowUI parent) : base(name, parent)
+    //     {
+    //     }
 
-        public new T SetAvailable(bool availability)
-        {
-            base.SetAvailable(availability);
-            return (T)this;
-        }
-        public new T SetAvailable(Func<bool> availability)
-        {
-            base.SetAvailable(availability);
-            return (T)this;
-        }
+    //     public new T SetAvailable(bool availability)
+    //     {
+    //         base.SetAvailable(availability);
+    //         return (T)this;
+    //     }
+    //     public new T SetAvailable(Func<bool> availability)
+    //     {
+    //         base.SetAvailable(availability);
+    //         return (T)this;
+    //     }
 
-        public T SetLabel(string label)
-        {
-            return SetLabel(new StringLabel(label));
-        }
+    //     public T SetLabel(string label)
+    //     {
+    //         return SetLabel(new StringLabel(label));
+    //     }
 
-        public new T SetLabel(IStringLabel label)
-        {
-            base.SetLabel(label);
-            return (T)this;
-        }
+    //     public new T SetLabel(IStringLabel label)
+    //     {
+    //         base.SetLabel(label);
+    //         return (T)this;
+    //     }
 
-        public T SetLabel(Func<string> content)
-        {
-            return SetLabel(new FunctionStringLabel(content));
-        }
+    //     public T SetLabel(Func<string> content)
+    //     {
+    //         return SetLabel(new FunctionStringLabel(content));
+    //     }
 
-        public new T ShowLabel(bool show)
-        {
-            base.ShowLabel(show);
-            return (T)this;
-        }
+    //     public new T ShowLabel(bool show)
+    //     {
+    //         base.ShowLabel(show);
+    //         return (T)this;
+    //     }
 
-        public T SetContent(string content)
-        {
-            return SetContent(new StringLabel(content));
-        }
+    //     public T SetContent(string content)
+    //     {
+    //         return SetContent(new StringLabel(content));
+    //     }
 
-        public new T SetContent(IStringLabel content)
-        {
-            base.SetContent(content);
-            return (T)this;
-        }
+    //     public new T SetContent(IStringLabel content)
+    //     {
+    //         base.SetContent(content);
+    //         return (T)this;
+    //     }
 
-        public T SetContent(Func<string> content)
-        {
-            return SetContent(new FunctionStringLabel(content));
-        }
-    }
+    //     public T SetContent(Func<string> content)
+    //     {
+    //         return SetContent(new FunctionStringLabel(content));
+    //     }
+    // }
 
     [Serializable]
-    public class WindowElement : IAvailabilitySyncTarget
+    [GlobalClass]
+    public partial class WindowElement : Control, IAvailabilitySyncTarget
     {
         protected IStringLabel _label;
         [Export] bool _showLabel = true;
@@ -76,9 +77,9 @@ namespace ChosenConcept.APFramework.UI.Element
         [Export] protected int _count;
         [Export] protected bool _flexible;
         [Export] protected bool _available = true;
-        [Export] Vector2 _cachedPositionStart = Vector2.zero;
-        [Export] Vector2 _cachedPositionEnd = Vector2.zero;
-        [Export] Vector2Int _characterIndex = new(-1, -1);
+        [Export] Vector2 _cachedPositionStart = Vector2.Zero;
+        [Export] Vector2 _cachedPositionEnd = Vector2.Zero;
+        [Export] Vector2I _characterIndex = new(-1, -1);
         [Export] protected WindowUI _parentWindow;
         Action _focusAction = null;
         Func<bool> _availabilityGetter = null;
@@ -235,8 +236,8 @@ namespace ChosenConcept.APFramework.UI.Element
 
         public virtual void ClearCachedPosition()
         {
-            _cachedPositionStart = Vector2.zero;
-            _cachedPositionEnd = Vector2.zero;
+            _cachedPositionStart = Vector2.Zero;
+            _cachedPositionEnd = Vector2.Zero;
         }
 
         public void SetCachedPosition((Vector2 startPosition, Vector2 endPosition) position)

@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class ScrollableTextUI : ButtonUI
+    [GlobalClass]
+    public partial class ScrollableTextUI : ButtonUI
     {
         int _contentHeight = 1;
         bool _inScroll;
@@ -138,15 +140,15 @@ namespace ChosenConcept.APFramework.UI.Element
             float fontSize = _parentWindow.setup.fontSize;
             bool hoverOnDecrease = false;
             bool hoverOnIncrease = false;
-            if (upperArrowDelta is { x: >= 0, y: >= 0 } && lowerArrowDelta is { x: >= 0, y: >= 0 })
+            if (upperArrowDelta is { X: >= 0, Y: >= 0 } && lowerArrowDelta is { X: >= 0, Y: >= 0 })
             {
-                if (upperArrowDelta.y < lowerArrowDelta.y &&
-                    upperArrowDelta.y < fontSize * 0.75f)
+                if (upperArrowDelta.Y < lowerArrowDelta.Y &&
+                    upperArrowDelta.Y < fontSize * 0.75f)
                 {
                     hoverOnDecrease = true;
                 }
-                else if (upperArrowDelta.y > lowerArrowDelta.y &&
-                         lowerArrowDelta.y < fontSize * 0.75f)
+                else if (upperArrowDelta.Y > lowerArrowDelta.Y &&
+                         lowerArrowDelta.Y < fontSize * 0.75f)
                 {
                     hoverOnIncrease = true;
                 }

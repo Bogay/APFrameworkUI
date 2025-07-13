@@ -3,12 +3,11 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://dwmm1offl170t"
-path="res://.godot/imported/NotoSansCJKtc-Regular.otf-350fc49681c3f2be8f826575d2257213.fontdata"
+valid=false
 
 [deps]
 
 source_file="res://Assets/APFramework/Resources/FontFiles/NotoSansCJKtc/NotoSansCJKtc-Regular.otf"
-dest_files=["res://.godot/imported/NotoSansCJKtc-Regular.otf-350fc49681c3f2be8f826575d2257213.fontdata"]
 
 [params]
 

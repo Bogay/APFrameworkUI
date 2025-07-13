@@ -4,16 +4,19 @@ using System.Linq;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class SelectionUI<T> : WindowElement<SelectionUI<T>>, ISelectable, IValueSyncTarget
+    // TODO: support generic
+    [GlobalClass]
+    public partial class SelectionUI : WindowElement, ISelectable, IValueSyncTarget
     {
-        Action<T> _action;
-        Func<T> _activeValueGeter;
+        Action<string> _action;
+        Func<string> _activeValueGeter;
         protected List<string> _choiceListContentCache = new();
         protected List<IStringLabel> _choiceList = new();
-        protected List<T> _choiceValueList = new();
+        protected List<string> _choiceValueList = new();
 
         public List<string> choiceListContent
         {
@@ -62,7 +65,7 @@ namespace ChosenConcept.APFramework.UI.Element
             SetCount(count);
         }
 
-        public SelectionUI<T> SetActiveValue(T value)
+        public SelectionUI SetActiveValue(string value)
         {
             int index = _choiceValueList.IndexOf(value);
             if (index < 0)
@@ -77,7 +80,7 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SelectionUI<T> SetActiveValue(Func<T> valueGetter)
+        public SelectionUI SetActiveValue(Func<string> valueGetter)
         {
             _activeValueGeter = valueGetter;
             int index = _choiceValueList.IndexOf(_activeValueGeter());
@@ -93,13 +96,13 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SelectionUI<T> SetCount(int count)
+        public SelectionUI SetCount(int count)
         {
             this.count = count;
             return this;
         }
 
-        public SelectionUI<T> SetAction(Action<T> action)
+        public SelectionUI SetAction(Action<string> action)
         {
             _action = action;
             return this;
@@ -118,11 +121,11 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceValueList.Clear();
         }
 
-        public SelectionUI<T> SetChoice(List<IStringLabel> choice, List<T> value)
+        public SelectionUI SetChoice(List<IStringLabel> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -132,11 +135,11 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SelectionUI<T> SetChoice(List<string> choice, List<T> value)
+        public SelectionUI SetChoice(List<string> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -145,25 +148,23 @@ namespace ChosenConcept.APFramework.UI.Element
             {
                 AddChoice(choice[i], value[i]);
             }
-
             return this;
         }
 
-        public SelectionUI<T> SetChoiceByValue(IEnumerable<T> value)
+        public SelectionUI SetChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T item in value)
+            foreach (string item in value)
             {
                 AddChoice(item.ToString(), item);
             }
-
             return this;
         }
 
-        public SelectionUI<T> SetLocalizedChoiceByValue(IEnumerable<T> value)
+        public SelectionUI SetLocalizedChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T item in value)
+            foreach (string item in value)
             {
                 AddChoice(new LocalizedStringLabel(_tag, item.ToString()), item);
             }
@@ -171,19 +172,19 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SelectionUI<T> AddChoice(string choice, T value)
+        public SelectionUI AddChoice(string choice, string value)
         {
             AddChoice(new StringLabel(choice), value);
             return this;
         }
 
-        public SelectionUI<T> AddLocalizedChoice(string tag, T value)
+        public SelectionUI AddLocalizedChoice(string tag, string value)
         {
             AddChoice(new LocalizedStringLabel(_tag, tag), value);
             return this;
         }
 
-        public SelectionUI<T> AddChoice(IStringLabel choice, T value)
+        public SelectionUI AddChoice(IStringLabel choice, string value)
         {
             _choiceListContentCache.Clear();
             _choiceList.Add(choice);
@@ -198,7 +199,7 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceValueList.RemoveAt(index);
         }
 
-        public void RemoveValue(T value)
+        public void RemoveValue(string value)
         {
             _choiceListContentCache.Clear();
             int index = _choiceValueList.IndexOf(value);

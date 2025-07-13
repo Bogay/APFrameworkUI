@@ -4,7 +4,8 @@ using Godot;
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [Serializable]
-    public struct MenuSetup
+    [GlobalClass]
+    public partial class MenuSetup : Resource
     {
         [Export] bool _allowCycleWithinWindow;
         [Export] bool _allowCycleBetweenWindows;

@@ -1,9 +1,11 @@
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class TextUI : WindowElement<TextUI>
+    [GlobalClass]
+    public partial class TextUI : WindowElement
     {
         public TextUI(string name, WindowUI parent) : base(name, parent)
         {

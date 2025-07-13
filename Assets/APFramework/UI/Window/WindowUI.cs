@@ -9,6 +9,7 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
+    [GlobalClass]
     public partial class WindowUI : Control
     {
         const int OUTLINE_PADDING = 1;
@@ -33,7 +34,7 @@ namespace ChosenConcept.APFramework.UI.Window
         [Export] bool _outlineReady;
         [Export] int _extraWidth;
         [Export] bool _isDirty = true;
-        [Export] List<WindowElement> _elements = new();
+        [Export] Godot.Collections.Array<WindowElement> _elements = new();
         [Export] bool _positionCached;
         [Export] Vector2 _cachedPositionStart = Vector2.Zero;
         [Export] Vector2 _cachedPositionEnd = Vector2.Zero;
@@ -45,7 +46,7 @@ namespace ChosenConcept.APFramework.UI.Window
         [Export] int _designatedHeight;
         [Export] bool _awaitDeactivate;
         [Export] bool _preciseSizeSync;
-        [Export] float _nextFunctionStringUpdate = Mathf.NegInf;
+        [Export] float _nextFunctionStringUpdate = -Mathf.Inf;
         IStringLabel _windowLabel;
         IStringLabel _windowSubscript = new StringLabel("");
         List<WindowElement> _interactables = new();
@@ -91,7 +92,8 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public WindowSetup setup => _setup;
         int contentWidth => _setup.width - 2;
-        public List<WindowElement> elements => _elements;
+        // TODO: performance issue?
+        public List<WindowElement> elements => _elements.ToList();
         public Control layout => _layout;
         public LayoutAlignment layoutAlignment => _layoutAlignment;
         public bool hasTitle => setup.titleStyle != WindowTitleStyle.None;
@@ -104,13 +106,13 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (!_positionCached)
                 return false;
-            if (_cachedPositionStart == Vector2.zero && _cachedPositionEnd == Vector2.zero)
+            if (_cachedPositionStart == Vector2.Zero && _cachedPositionEnd == Vector2.Zero)
                 return false;
             Vector2 topLeftDelta = position - _cachedPositionStart;
-            if (topLeftDelta.x <= 0 || topLeftDelta.y <= 0)
+            if (topLeftDelta.X <= 0 || topLeftDelta.Y <= 0)
                 return false;
             Vector2 bottomRightDelta = position - _cachedPositionEnd;
-            if (bottomRightDelta.x >= 0 || bottomRightDelta.y >= 0)
+            if (bottomRightDelta.X >= 0 || bottomRightDelta.Y >= 0)
                 return false;
             return true;
         }
@@ -119,21 +121,21 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (index < 0 || index > _interactables.Count || _interactables[index].firstCharacterIndex == -1 ||
                 _interactables[index].lastCharacterIndex == -1 ||
-                _interactables[index].cachedPosition == (Vector2.zero, Vector2.zero))
-                return (Vector2.zero, Vector2.zero);
+                _interactables[index].cachedPosition == (Vector2.Zero, Vector2.Zero))
+                return (Vector2.Zero, Vector2.Zero);
             return _interactables[index].cachedPosition;
         }
 
         public bool InteractableContainsPosition(int index, Vector2 position)
         {
             (Vector2 bottomLeft, Vector2 topRight) = SelectableBound(index);
-            if (bottomLeft == Vector2.zero && topRight == Vector2.zero)
+            if (bottomLeft == Vector2.Zero && topRight == Vector2.Zero)
                 return false;
             Vector2 bottomLeftDelta = position - bottomLeft;
-            if (bottomLeftDelta.x <= 0 || bottomLeftDelta.y <= 0)
+            if (bottomLeftDelta.X <= 0 || bottomLeftDelta.Y <= 0)
                 return false;
             Vector2 topRightDelta = position - topRight;
-            if (topRightDelta.x >= 0 || topRightDelta.y >= 0)
+            if (topRightDelta.X >= 0 || topRightDelta.Y >= 0)
                 return false;
             return true;
         }
@@ -155,7 +157,10 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             _windowLabelCache = null;
             _windowSubscriptCache = null;
-            _elements.ForEach(x => x.ClearCache());
+            foreach (WindowElement element in _interactables)
+            {
+                element.ClearCache();
+            }
         }
 
         void CheckFunctionStringLabelDirty()
@@ -182,7 +187,10 @@ namespace ChosenConcept.APFramework.UI.Window
         public void SetLocalizedByTag()
         {
             SetLabel(new LocalizedStringLabel(_windowTag));
-            _elements.ForEach(x => x.SetLocalizedByTag());
+            foreach (WindowElement element in _elements)
+            {
+                element.SetLocalizedByTag();
+            }
         }
 
         public void UpdateWindow()
@@ -219,7 +227,7 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (!_active)
                 return;
-            _drawText.Modulate = new Color(1, 1, 1, Mathf.Clamp01(alpha));
+            _drawText.Modulate = new Color(1, 1, 1, Mathf.Clamp(alpha, 0, 1));
             _outlineBuilder.SetOpacity(alpha);
         }
 
@@ -328,8 +336,8 @@ namespace ChosenConcept.APFramework.UI.Window
                 element.ClearCachedPosition();
             }
 
-            _cachedPositionStart = Vector2.zero;
-            _cachedPositionEnd = Vector2.zero;
+            _cachedPositionStart = Vector2.Zero;
+            _cachedPositionEnd = Vector2.Zero;
             _positionCached = false;
         }
 
@@ -395,7 +403,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 if (count == 0)
                 {
                     TextUI text = AddText("DummyBlankText");
-                    text.SetLabel(TextUtility.Repeat(' ', 10));
+                    text.SetLabel(new StringLabel(TextUtility.Repeat(' ', 10)));
                     AutoResize();
                 }
 
@@ -515,7 +523,7 @@ namespace ChosenConcept.APFramework.UI.Window
             // Convert Unity font size to Godot
             var theme = new Theme();
             var fontFile = new FontFile();
-            theme.SetFontSize("normal_font_size", "RichTextLabel", _setup.fontSize);
+            theme.SetFontSize("normal_font_size", "RichTextLabel", (int)_setup.fontSize);
             _drawText.Theme = theme;
             _outlineBuilder.outline.Theme = theme;
             _windowMask.mask.Theme = theme;
@@ -765,7 +773,7 @@ namespace ChosenConcept.APFramework.UI.Window
         public void AddGap()
         {
             AddText("Blank")
-                .SetLabel("　");
+                .SetLabel(new StringLabel("　"));
         }
 
         public ButtonUI AddButton(string elementName, Action action = null)
@@ -792,25 +800,25 @@ namespace ChosenConcept.APFramework.UI.Window
             return toggle;
         }
 
-        public SliderUI<T> AddSlider<T>(string elementName, Action<T> action = null)
+        public SliderUI AddSlider(string elementName, Action<string> action = null)
         {
-            SliderUI<T> slider = new SliderUI<T>(elementName, this);
+            SliderUI slider = new SliderUI(elementName, this);
             slider.SetAction(action);
             AddElement(slider);
             return slider;
         }
 
-        public QuickSelectionUI<T> AddQuickSelectionUI<T>(string elementName, Action<T> action = null)
+        public QuickSelectionUI AddQuickSelectionUI(string elementName, Action<string> action = null)
         {
-            QuickSelectionUI<T> selection = new(elementName, this);
+            QuickSelectionUI selection = new(elementName, this);
             selection.SetAction(action);
             AddElement(selection);
             return selection;
         }
 
-        public SelectionUI<T> AddSingleSelection<T>(string elementName, Action<T> action = null)
+        public SelectionUI AddSingleSelection(string elementName, Action<string> action = null)
         {
-            SelectionUI<T> selection = new SelectionUI<T>(elementName, this);
+            SelectionUI selection = new SelectionUI(elementName, this);
             selection.SetAction(action);
             AddElement(selection);
             return selection;

@@ -1,3 +1,5 @@
+using Godot;
+
 namespace ChosenConcept.APFramework.UI.Element
 {
     public interface ISlider

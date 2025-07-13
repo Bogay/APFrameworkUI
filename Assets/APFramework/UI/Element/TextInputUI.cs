@@ -4,16 +4,19 @@ using System.Linq;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class TextInputUI : WindowElement<TextInputUI>
+    [GlobalClass]
+
+    public partial class TextInputUI : WindowElement
     {
         bool _inInput;
         string _inputContent = string.Empty;
         int _height = 1;
         int _caretPosition = -1;
-        Vector2Int _selectionRange = Vector2Int.zero;
+        Vector2I _selectionRange = Vector2I.Zero;
         Action<string> _setStringAction;
         List<string> _predictionCandidates = new();
 
@@ -31,7 +34,7 @@ namespace ChosenConcept.APFramework.UI.Element
         }
 
         public string inputContent => _inputContent;
-        protected bool hasSelection => _selectionRange.x != _selectionRange.y;
+        protected bool hasSelection => _selectionRange.X != _selectionRange.Y;
 
         public override string formattedContent => ZString.Concat(labelPrefix, _inputContent);
 
@@ -43,13 +46,13 @@ namespace ChosenConcept.APFramework.UI.Element
                 {
                     if (hasSelection)
                     {
-                        Vector2Int selectionRange = _selectionRange;
-                        selectionRange.y++;
+                        Vector2I selectionRange = _selectionRange;
+                        selectionRange.Y++;
 
                         return ZString.Concat(labelPrefix, StyleUtility.StringColoredRange(
                             _inputContent
                                 .Insert(Mathf.Min(_caretPosition, _inputContent.Length),
-                                    "█"), StyleUtility.selected, selectionRange.x, selectionRange.y));
+                                    "█"), StyleUtility.selected, selectionRange.X, selectionRange.Y));
                     }
 
                     if (_caretPosition >= 0)
@@ -117,8 +120,8 @@ namespace ChosenConcept.APFramework.UI.Element
 
         public void SetSelectionRange(int first, int last)
         {
-            _selectionRange.x = Mathf.Min(first, last);
-            _selectionRange.y = Mathf.Max(first, last);
+            _selectionRange.X = Mathf.Min(first, last);
+            _selectionRange.Y = Mathf.Max(first, last);
             parentWindow?.InvokeUpdate();
         }
 

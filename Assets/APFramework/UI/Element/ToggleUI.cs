@@ -2,10 +2,12 @@ using System;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class ToggleUI : WindowElement<ToggleUI>, IValueSyncTarget
+    [GlobalClass]
+    public partial class ToggleUI : WindowElement, IValueSyncTarget
     {
         protected bool _toggledOn;
         Action<bool> _action;

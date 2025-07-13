@@ -3,8 +3,9 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
+    [GlobalClass]
     [System.Serializable]
-    public struct WindowSetup
+    public partial class WindowSetup : Resource
     {
         [Export] int _width;
         [Export] int _height;
@@ -45,10 +46,12 @@ namespace ChosenConcept.APFramework.UI.Window
             _transitionIn = WindowTransition.Glitch,
             _transitionOut = WindowTransition.Glitch,
             _fontSize = 30,
-            _backgroundColor = Colors.Transparent,
+            _backgroundColor = Color.Color8(0, 0, 0, 0),
             _functionStringUpdateInterval = 0,
             _syncActiveValueAutomatically = true
         };
+
+        public WindowSetup() { }
 
         public WindowSetup(WindowSetup setup)
         {

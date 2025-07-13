@@ -8,7 +8,8 @@ using Godot;
 namespace ChosenConcept.APFramework.UI.Menu
 {
     [Serializable]
-    public class SimpleMenu : IMenuInputTarget
+    [GlobalClass]
+    public partial class SimpleMenu : Control, IMenuInputTarget
     {
         [Export]
         string _menuName;
@@ -19,14 +20,14 @@ namespace ChosenConcept.APFramework.UI.Menu
         [Export] LayoutAlignment _layoutAlignmentInstance;
         [Export] bool _displayActive;
         [Export] bool _navigationActive;
-        [Export] int _linkFrame = -1;
-        [Export] float _nextNavigationUpdate = Mathf.Infinity;
+        [Export] ulong _linkFrame = ulong.MaxValue;
+        [Export] float _nextNavigationUpdate = Mathf.Inf;
         [Export] int _currentSelection = -1;
-        [Export] float _holdStart = Mathf.Infinity;
-        [Export] float _holdNavigationNext = Mathf.Infinity;
-        [Export] Vector2 _move = Vector2.zero;
-        [Export] Vector2 _mouseScroll = Vector2.zero;
-        [Export] Vector2 _lastMousePosition = Vector2.negativeInfinity;
+        [Export] float _holdStart = Mathf.Inf;
+        [Export] float _holdNavigationNext = Mathf.Inf;
+        [Export] Vector2 _move = Vector2.Zero;
+        [Export] Vector2 _mouseScroll = Vector2.Zero;
+        [Export] Vector2 _lastMousePosition = -Vector2.Inf;
         [Export] bool _mouseSelectionTargetExists;
         [Export] bool _hoverOnDecrease;
         [Export] bool _hoverOnIncrease;
@@ -115,14 +116,14 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_displayActive)
                 return;
-            if (!_navigationActive && Time.unscaledTime >= _nextNavigationUpdate)
+            if (!_navigationActive && (Time.GetTicksMsec() / 1000_000) >= _nextNavigationUpdate)
                 _navigationActive = true;
             UpdateNavigation();
         }
 
         void UpdateNavigation()
         {
-            if (!_windowInstance.canNavigate || _linkFrame == Time.frameCount)
+            if (!_windowInstance.canNavigate || _linkFrame == Engine.GetProcessFrames())
                 return;
             if (_movingWindow)
             {
@@ -131,10 +132,10 @@ namespace ChosenConcept.APFramework.UI.Menu
             }
 
             UpdateMouseNavigation();
-            if (Time.unscaledTime < _nextNavigationUpdate)
+            if ((Time.GetTicksMsec() / 1000_000) < _nextNavigationUpdate)
                 return;
             UpdateWindowPosition();
-            if (float.IsPositiveInfinity(_holdStart) || _holdNavigationNext <= Time.unscaledTime)
+            if (float.IsPositiveInfinity(_holdStart) || _holdNavigationNext <= (Time.GetTicksMsec() / 1000_000))
             {
                 UpdateSelection();
             }
@@ -194,7 +195,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         public void AddGap()
         {
             AddText("Blank")
-                .SetLabel("　");
+                .SetLabel(new StringLabel("　"));
         }
 
         public void RemoveElement(WindowElement element)
@@ -208,7 +209,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             // with shared instance, it is possible that another menu destroys the layout
             if (_layoutAlignmentInstance != null)
             {
-                GD.QueueFree(_layoutAlignmentInstance);
+                _layoutAlignmentInstance.QueueFree();
                 _layoutAlignmentInstance = null;
             }
         }
@@ -328,7 +329,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void LinkInput()
         {
-            _linkFrame = Time.frameCount;
+            _linkFrame = Engine.GetProcessFrames();
             ResetInput();
             WindowManager.instance.LinkInputTarget(this);
         }
@@ -341,8 +342,8 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void ResetInput()
         {
-            _move = Vector2.zero;
-            _mouseScroll = Vector2.zero;
+            _move = Vector2.Zero;
+            _mouseScroll = Vector2.Zero;
         }
 
         public void ResetSelection()
@@ -390,7 +391,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             else
             {
                 UnlinkInput();
-                _nextNavigationUpdate = Mathf.Infinity;
+                _nextNavigationUpdate = Mathf.Inf;
             }
         }
 
@@ -409,13 +410,13 @@ namespace ChosenConcept.APFramework.UI.Menu
             if (!_navigationActive)
                 return;
             bool mouseScrollOverride = false;
-            if (_move.sqrMagnitude < _mouseScroll.sqrMagnitude)
+            if (_move.LengthSquared() < _mouseScroll.LengthSquared())
             {
                 _move = _mouseScroll;
                 mouseScrollOverride = true;
             }
 
-            if (_move.magnitude < .5f)
+            if (_move.Length() < .5f)
                 return;
             // if all elements are deselected, reset to the first element first
             if (_currentSelection < 0)
@@ -424,21 +425,21 @@ namespace ChosenConcept.APFramework.UI.Menu
             }
             else
             {
-                UpdateSelectionByMovement(_move.normalized);
+                UpdateSelectionByMovement(_move.Normalized());
                 // Ignore when mouse scroll to prevent scrolling out of a window
                 if (!_inElementInputMode && !_selectionUpdated && !mouseScrollOverride)
                 {
                     WindowManager.instance.CheckClosestDirectionalMatch(this,
-                        currentSelectable.cachedPosition.Item1, _move.normalized, _menuSetup.allowCycleBetweenWindows);
+                        currentSelectable.cachedPosition.Item1, _move.Normalized(), _menuSetup.allowCycleBetweenWindows);
                 }
 
-                _move = Vector2.zero;
+                _move = Vector2.Zero;
             }
 
             if (mouseScrollOverride)
             {
-                _move = Vector2.zero;
-                _mouseScroll = Vector2.zero;
+                _move = Vector2.Zero;
+                _mouseScroll = Vector2.Zero;
             }
         }
 
@@ -448,7 +449,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             {
                 currentSelectable?.SetFocus(false);
                 int yBefore = _currentSelection;
-                int offset = Mathf.RoundToInt(move.y) switch
+                int offset = Mathf.RoundToInt(move.Y) switch
                 {
                     1 => -1,
                     -1 => 1,
@@ -472,7 +473,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             else
             {
                 int result = currentSelectable.count;
-                int offset = Mathf.RoundToInt(move.x) switch
+                int offset = Mathf.RoundToInt(move.X) switch
                 {
                     1 => 1,
                     -1 => -1,
@@ -480,9 +481,9 @@ namespace ChosenConcept.APFramework.UI.Menu
                 };
                 if (currentSelectable is ScrollableTextUI scrollableText)
                 {
-                    if (move.y != 0)
+                    if (move.Y != 0)
                     {
-                        offset = Mathf.RoundToInt(move.y) switch
+                        offset = Mathf.RoundToInt(move.Y) switch
                         {
                             1 => -1,
                             -1 => 1,
@@ -507,18 +508,18 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void ResetDirection()
         {
-            if (!_menuSetup.singlePressOnly && _move.sqrMagnitude > 0)
+            if (!_menuSetup.singlePressOnly && _move.LengthSquared() > 0)
             {
                 if (float.IsPositiveInfinity(_holdStart))
                 {
-                    _holdStart = Time.unscaledTime;
+                    _holdStart = (Time.GetTicksMsec() / 1000_000);
                 }
-                else if (Time.unscaledTime - _holdStart >= _menuSetup.holdNavigationDelay &&
+                else if ((Time.GetTicksMsec() / 1000_000) - _holdStart >= _menuSetup.holdNavigationDelay &&
                          (float.IsPositiveInfinity(_holdNavigationNext) ||
-                          Time.unscaledTime >= _holdNavigationNext))
+                          (Time.GetTicksMsec() / 1000_000) >= _holdNavigationNext))
                 {
-                    _holdNavigationNext = Time.unscaledTime + _menuSetup.holdNavigationInterval /
-                        Mathf.CeilToInt((Time.unscaledTime - _holdStart - _menuSetup.holdNavigationDelay) /
+                    _holdNavigationNext = (Time.GetTicksMsec() / 1000_000) + _menuSetup.holdNavigationInterval /
+                        Mathf.CeilToInt(((Time.GetTicksMsec() / 1000_000) - _holdStart - _menuSetup.holdNavigationDelay) /
                                         _menuSetup.holdNavigationSpeedUpInterval);
                 }
             }
@@ -532,9 +533,9 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void ResetHold()
         {
-            _holdStart = Mathf.Infinity;
-            _holdNavigationNext = Mathf.Infinity;
-            _move = Vector2.zero;
+            _holdStart = Mathf.Inf;
+            _holdNavigationNext = Mathf.Inf;
+            _move = Vector2.Zero;
         }
 
         public void RefocusAtNearestElement(Vector2 referenceLocation)
@@ -543,14 +544,14 @@ namespace ChosenConcept.APFramework.UI.Menu
                 return;
             if (!windowPositionCached)
                 UpdateWindowPosition();
-            float minDistance = Mathf.Infinity;
+            float minDistance = Mathf.Inf;
             currentSelectable?.SetFocus(false);
             if (!_windowInstance.canNavigate)
                 return;
             for (int i = 0; i < _windowInstance.interactables.Count; i++)
             {
                 Vector2 selectableLocation = _windowInstance.interactables[i].cachedPosition.Item1;
-                float distance = (selectableLocation - referenceLocation).sqrMagnitude;
+                float distance = (selectableLocation - referenceLocation).LengthSquared();
                 if (distance < minDistance)
                 {
                     minDistance = distance;
@@ -577,16 +578,16 @@ namespace ChosenConcept.APFramework.UI.Menu
             return _windowInstance.AddScrollableText(elementName, action);
         }
 
-        public SelectionUI<T> AddSingleSelection<T>(string elementName,
-            Action<T> action = null)
+        public SelectionUI AddSingleSelection(string elementName,
+            Action<string> action = null)
         {
             if (_windowInstance == null)
                 NewWindow(elementName);
             return _windowInstance.AddSingleSelection(elementName, action);
         }
 
-        public SelectionUI<T>
-            AddSingleSelection<T>(string elementName, WindowUI window, Action<T> action = null) =>
+        public SelectionUI
+            AddSingleSelection(string elementName, WindowUI window, Action<string> action = null) =>
             window.AddSingleSelection(elementName, action);
 
         public TextInputUI AddTextInput(string elementName, Action<string> action = null)
@@ -604,8 +605,8 @@ namespace ChosenConcept.APFramework.UI.Menu
             return _windowInstance.AddToggle(elementName, action);
         }
 
-        public SliderUI<T> AddSlider<T>(string elementName,
-            Action<T> action = null)
+        public SliderUI AddSlider(string elementName,
+            Action<string> action = null)
         {
             if (_windowInstance == null)
                 NewWindow(elementName);
@@ -676,7 +677,7 @@ namespace ChosenConcept.APFramework.UI.Menu
                 _windowInstance.ContainsPosition(WindowManager.instance.inputProvider.mousePosition))
             {
                 _movingWindow = true;
-                _windowInstance.Move(Vector2.zero);
+                _windowInstance.Move(Vector2.Zero);
             }
             else if (_menuSetup.allowCloseOnClick is MenuCloseOnClickBehavior.Both
                          or MenuCloseOnClickBehavior.InFocus && _currentSelection == -1)
@@ -707,7 +708,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_displayActive)
                 return false;
-            if (!_navigationActive || _linkFrame == Time.frameCount)
+            if (!_navigationActive || _linkFrame == Engine.GetProcessFrames())
                 return false;
             if (currentSelectable == null)
                 return false;
@@ -723,7 +724,7 @@ namespace ChosenConcept.APFramework.UI.Menu
                 return false;
             }
 
-            if (!_navigationActive || _linkFrame == Time.frameCount)
+            if (!_navigationActive || _linkFrame == Engine.GetProcessFrames())
             {
                 return false;
             }
@@ -843,7 +844,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_displayActive)
                 return false;
-            if (!_navigationActive || _linkFrame == Time.frameCount)
+            if (!_navigationActive || _linkFrame == Engine.GetProcessFrames())
                 return false;
             if (currentSelectable == null)
             {
@@ -870,7 +871,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void ClearWindowLocation(float delay = .1f)
         {
-            if (_nextNavigationUpdate < Time.unscaledTime + delay)
+            if (_nextNavigationUpdate < (Time.GetTicksMsec() / 1000_000) + delay)
             {
                 DelayInput(delay);
             }
@@ -914,7 +915,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             if (!_displayActive)
                 return false;
             UnlinkInput();
-            _nextNavigationUpdate = Mathf.Infinity;
+            _nextNavigationUpdate = Mathf.Inf;
 
             if (_inElementInputMode)
             {
@@ -930,7 +931,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             _focused = false;
             _displayActive = false;
             _navigationActive = false;
-            _nextNavigationUpdate = Mathf.Infinity;
+            _nextNavigationUpdate = Mathf.Inf;
             _windowInstance.SetActive(false);
             _menuCloseAction?.Invoke();
 
@@ -950,7 +951,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void DelayInput(float delay)
         {
-            _nextNavigationUpdate = Time.unscaledTime + delay;
+            _nextNavigationUpdate = (Time.GetTicksMsec() / 1000_000) + delay;
         }
 
         public void SetFocused(bool focused)

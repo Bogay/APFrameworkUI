@@ -3,12 +3,11 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://bfxupk0ytr1si"
-path="res://.godot/imported/LiberationSans.ttf-83c9802af2c573de8efb12418d7821bc.fontdata"
+valid=false
 
 [deps]
 
 source_file="res://Assets/TextMesh Pro/Fonts/LiberationSans.ttf"
-dest_files=["res://.godot/imported/LiberationSans.ttf-83c9802af2c573de8efb12418d7821bc.fontdata"]
 
 [params]
 

@@ -14,20 +14,20 @@ namespace ChosenConcept.APFramework.UI
     public partial class WindowManager : Node, IMenuInputTarget
     {
         static WindowManager _instance;
-        public static WindowManager instance => _instance ??= GetViewport().GetNode<WindowManager>("WindowManager");
+        public static WindowManager instance => _instance;
 
         [Export] WindowUI _windowTemplate;
         [Export] CanvasLayer _layerTemplate;
         [Export] Control _layoutTemplate;
         [Export] TextureRect _backgroundTemplate;
         [Export] TextInputProvider _textInputProvider;
-        [Export] SelectionProvider _selectionProvider;
+        // [Export] SelectionProvider _selectionProvider;
         // [Export] ConfirmationProvider _confirmationProvider;
         // [Export] ContextMenuProvider _contextMenuProvider;
         [Export] Camera2D _interfaceCamera;
-        [Export] List<WindowUI> _windows = new();
-        [Export] List<SimpleMenu> _simpleMenus = new();
-        [Export] List<LayoutAlignment> _layoutAlignments = new();
+        [Export] Godot.Collections.Array<WindowUI> _windows = new();
+        [Export] Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
+        [Export] Godot.Collections.Array<LayoutAlignment> _layoutAlignments = new();
         [Export] Vector2 _lastMousePosition = Vector2.Inf * -1;
         Dictionary<MenuLayer, CanvasLayer> _layers = new();
         Dictionary<MenuLayer, CanvasLayer> _backgroundLayers = new();
@@ -87,13 +87,13 @@ namespace ChosenConcept.APFramework.UI
             _textInputProvider.GetTextInput(sourceUI, text);
         }
 
-        public void GetSelectionInput(IMenuInputTarget sourceUI, List<string> choices,
-            int currentChoice)
-        {
-            EnableGlobalVisibility(false);
+        // public void GetSelectionInput(IMenuInputTarget sourceUI, List<string> choices,
+        //     int currentChoice)
+        // {
+        //     EnableGlobalVisibility(false);
 
-            _selectionProvider.GetSelection(sourceUI, choices, currentChoice);
-        }
+        //     _selectionProvider.GetSelection(sourceUI, choices, currentChoice);
+        // }
 
         public void EndSelectionInput()
         {
@@ -118,7 +118,7 @@ namespace ChosenConcept.APFramework.UI
         public override void _Ready()
         {
             _instance ??= this;
-            _inputProvider = new UnityInputProvider();
+            _inputProvider = new GodotInputProvider();
             _inputProvider.SetTarget(this);
             _inputProvider.EnableInput(true);
             // _contextMenuProvider.Initialize();
@@ -198,11 +198,12 @@ namespace ChosenConcept.APFramework.UI
             }
         }
 
-        public Vector2 UIBoundRetriever(Node2D windowTransform, Vector2 elementPosition)
+        public Vector2 UIBoundRetriever(Control windowTransform, Vector2 elementPosition)
         {
             // Convert to global coordinates and then to screen coordinates
-            Vector2 globalPos = windowTransform.ToGlobal(elementPosition);
-            return GetViewport().GetCamera2D().GetScreenCenterPosition() + globalPos;
+            // Vector2 globalPos = windowTransform.ToGlobal(elementPosition);
+            // return GetViewport().GetCamera2D().GetScreenCenterPosition() + globalPos;
+            return elementPosition;
         }
 
         public void WindowRefresh()
@@ -396,7 +397,7 @@ namespace ChosenConcept.APFramework.UI
         public bool CheckClosestDirectionalMatch(SimpleMenu source, Vector2 currentPosition, Vector2 inputDirection,
             bool allowCycleBetweenWindows)
         {
-            float minScore = Mathf.Infinity;
+            float minScore = Mathf.Inf;
             SimpleMenu nearestMenu = source;
             foreach (SimpleMenu menu in _simpleMenus)
             {
@@ -406,9 +407,9 @@ namespace ChosenConcept.APFramework.UI
                 Vector2 windowCenter =
                     (menu.windowInstance.cachedPosition.Item1 + menu.windowInstance.cachedPosition.Item2) / 2f;
                 Vector2 direction = windowCenter - currentPosition;
-                float distance = direction.sqrMagnitude;
-                Vector2 directionNormalized = direction.normalized;
-                float dotProduct = Vector2.Dot(inputDirection, directionNormalized);
+                float distance = direction.LengthSquared();
+                Vector2 directionNormalized = direction.Normalized();
+                float dotProduct = inputDirection.Dot(directionNormalized);
                 if (dotProduct < .3f)
                     continue;
                 // Favoring both shorter distance and better directional match
@@ -423,14 +424,14 @@ namespace ChosenConcept.APFramework.UI
             if (nearestMenu != source)
             {
                 int nearestInteractableIndex = -1;
-                minScore = Mathf.Infinity;
+                minScore = Mathf.Inf;
                 for (int i = 0; i < nearestMenu.windowInstance.interactables.Count; i++)
                 {
                     // Using only the starting position for consistency
                     Vector2 position1 = nearestMenu.windowInstance.interactables[i].cachedPosition.Item1;
                     Vector2 selectableLocation = position1;
                     Vector2 direction = selectableLocation - currentPosition;
-                    float distance = direction.sqrMagnitude;
+                    float distance = direction.LengthSquared();
                     if (distance < minScore)
                     {
                         minScore = distance;
@@ -538,6 +539,14 @@ namespace ChosenConcept.APFramework.UI
             //         return t;
             //     }
             // }
+
+            foreach (SimpleMenu simpleMenu in _simpleMenus)
+            {
+                if (simpleMenu is T t)
+                {
+                    return t;
+                }
+            }
 
             throw new Exception($"Menu {typeof(T)} not found");
         }

@@ -7,8 +7,8 @@ using Godot;
 
 public partial class SimpleMenuInstance : Node
 {
-    [Export] List<LayoutSetup> _layoutSetups = new();
-    [Export] List<SimpleMenu> _simpleMenus = new();
+    [Export] Godot.Collections.Array<LayoutSetup> _layoutSetups = new();
+    [Export] Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
     bool _active;
 
     public override void _Ready()
@@ -21,10 +21,10 @@ public partial class SimpleMenuInstance : Node
             SimpleMenu menu = new(i.ToString(), setup, WindowSetup.defaultSetup, layout);
             _simpleMenus.Add(menu);
             menu.AddText("Close all menu to quit");
-            menu.AddSingleSelection<int>("Test", obj => { })
-                .SetChoiceByValue(new List<int> { 1, 2, 3 });
-            menu.AddSlider<int>("slider")
-                .SetChoiceByValue(new[] { 0, 1, 2, 3 })
+            menu.AddSingleSelection("Test", obj => { })
+                .SetChoiceByValue(new List<string> { "1", "2", "3" });
+            menu.AddSlider("slider")
+                .SetChoiceByValue(new[] { "0", "1", "2", "3" })
                 .SetAction(x => GD.Print(x));
             menu.AddButton("close", () => menu.CloseMenu());
             WindowManager.instance.RegisterMenu(menu);

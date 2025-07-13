@@ -4,19 +4,22 @@ using System.Linq;
 using ChosenConcept.APFramework.UI.Utility;
 using ChosenConcept.APFramework.UI.Window;
 using Cysharp.Text;
+using Godot;
 
 namespace ChosenConcept.APFramework.UI.Element
 {
-    public class SliderUI<T> : WindowElement<SliderUI<T>>, ISlider, IValueSyncTarget
+    // TODO: support generic
+    [GlobalClass]
+    public partial class SliderUI : WindowElement, ISlider, IValueSyncTarget
     {
         bool _inInput;
         List<string> _choiceListContentCache = new();
         List<IStringLabel> _choiceList = new();
-        List<T> _choiceValueList = new();
-        Action<T> _action;
-        Func<T> _activeValueGetter;
+        List<string> _choiceValueList = new();
+        Action<string> _action;
+        Func<string> _activeValueGetter;
 
-        (Vector2, Vector2) _cachedArrowPosition = (Vector2.zero, Vector2.zero);
+        (Vector2, Vector2) _cachedArrowPosition = (Vector2.Zero, Vector2.Zero);
         int ISlider.firstSliderArrowIndex => firstCharacterIndex + labelPrefix.Length;
         int ISlider.lastSliderArrowIndex => lastCharacterIndex;
         public (Vector2, Vector2) cachedArrowPosition => _cachedArrowPosition;
@@ -103,13 +106,13 @@ namespace ChosenConcept.APFramework.UI.Element
         {
         }
 
-        public SliderUI<T> SetAction(Action<T> action)
+        public SliderUI SetAction(Action<string> action)
         {
             _action = action;
             return this;
         }
 
-        public SliderUI<T> SetActiveValue(T value)
+        public SliderUI SetActiveValue(string value)
         {
             int index = _choiceValueList.IndexOf(value);
             if (index < 0)
@@ -124,7 +127,7 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SliderUI<T> SetActiveValue(Func<T> valueGetter)
+        public SliderUI SetActiveValue(Func<string> valueGetter)
         {
             _activeValueGetter = valueGetter;
             int index = _choiceValueList.IndexOf(valueGetter());
@@ -153,11 +156,11 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceList.Clear();
         }
 
-        public SliderUI<T> SetChoice(List<IStringLabel> choice, List<T> value)
+        public SliderUI SetChoice(List<IStringLabel> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -167,11 +170,11 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SliderUI<T> SetChoice(List<string> choice, List<T> value)
+        public SliderUI SetChoice(List<string> choice, List<string> value)
         {
             if (choice.Count != value.Count)
             {
-                Debug.LogError($"Mismatch amount of {choice.Count} and {value.Count}");
+                GD.PrintErr($"Mismatch amount of {choice.Count} and {value.Count}");
                 return this;
             }
 
@@ -184,10 +187,10 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SliderUI<T> SetChoiceByValue(IEnumerable<T> value)
+        public SliderUI SetChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T choice in value)
+            foreach (string choice in value)
             {
                 AddChoice(choice.ToString(), choice);
             }
@@ -195,10 +198,10 @@ namespace ChosenConcept.APFramework.UI.Element
             return this;
         }
 
-        public SliderUI<T> SetLocalizedChoiceByValue(IEnumerable<T> value)
+        public SliderUI SetLocalizedChoiceByValue(IEnumerable<string> value)
         {
             ClearChoice();
-            foreach (T item in value)
+            foreach (string item in value)
             {
                 AddChoice(new LocalizedStringLabel(_tag, item.ToString()), item);
             }
@@ -207,17 +210,17 @@ namespace ChosenConcept.APFramework.UI.Element
         }
 
 
-        public SliderUI<T> AddLocalizedChoice(string tag, T value)
+        public SliderUI AddLocalizedChoice(string tag, string value)
         {
             return AddChoice(new LocalizedStringLabel(_tag, tag), value);
         }
 
-        public SliderUI<T> AddChoice(string choice, T value)
+        public SliderUI AddChoice(string choice, string value)
         {
             return AddChoice(new StringLabel(choice), value);
         }
 
-        public SliderUI<T> AddChoice(IStringLabel choice, T value)
+        public SliderUI AddChoice(IStringLabel choice, string value)
         {
             _choiceListContentCache.Clear();
             _choiceList.Add(choice);
@@ -232,14 +235,14 @@ namespace ChosenConcept.APFramework.UI.Element
             _choiceValueList.RemoveAt(index);
         }
 
-        public SliderUI<T> AddChoiceByValue(T choice)
+        public SliderUI AddChoiceByValue(string choice)
         {
             _choiceList.Add(new StringLabel(choice.ToString()));
             _choiceValueList.Add(choice);
             return this;
         }
 
-        public void RemoveValue(T value)
+        public void RemoveValue(string value)
         {
             _choiceListContentCache.Clear();
             int index = _choiceValueList.IndexOf(value);
@@ -288,7 +291,7 @@ namespace ChosenConcept.APFramework.UI.Element
         public override void ClearCachedPosition()
         {
             base.ClearCachedPosition();
-            _cachedArrowPosition = (Vector2.zero, Vector2.zero);
+            _cachedArrowPosition = (Vector2.Zero, Vector2.Zero);
         }
 
         (bool, bool) ISlider.HoverOnArrow(Vector2 position)
@@ -298,12 +301,12 @@ namespace ChosenConcept.APFramework.UI.Element
             float fontSize = _parentWindow.setup.fontSize;
             Vector2 leftArrowDelta = position - _cachedArrowPosition.Item1;
             Vector2 rightArrowDelta = position - _cachedArrowPosition.Item2;
-            if (leftArrowDelta.sqrMagnitude < rightArrowDelta.sqrMagnitude &&
-                Mathf.Abs(leftArrowDelta.x) < fontSize && Mathf.Abs(leftArrowDelta.y) < fontSize)
+            if (leftArrowDelta.LengthSquared() < rightArrowDelta.LengthSquared() &&
+                Mathf.Abs(leftArrowDelta.X) < fontSize && Mathf.Abs(leftArrowDelta.Y) < fontSize)
             {
                 hoverOnDecrease = true;
             }
-            else if (Mathf.Abs(rightArrowDelta.x) < fontSize && Mathf.Abs(rightArrowDelta.y) < fontSize)
+            else if (Mathf.Abs(rightArrowDelta.X) < fontSize && Mathf.Abs(rightArrowDelta.Y) < fontSize)
             {
                 hoverOnIncrease = true;
             }

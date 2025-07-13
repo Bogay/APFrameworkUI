@@ -174,7 +174,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         float SetupTransition(WindowTransition transitionSetup, bool toSyncGameObject = false)
         {
-            _nextUpdate = Mathf.NegInf;
+            _nextUpdate = -Mathf.Inf;
             _currentStep = 0;
             int counter = 0;
             switch (transitionSetup)
@@ -305,7 +305,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (active)
             {
                 mask.Text = _maskText;
-                _nextUpdate = Mathf.NegInf;
+                _nextUpdate = -Mathf.Inf;
             }
             else
             {
