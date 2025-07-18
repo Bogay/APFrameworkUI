@@ -5,10 +5,9 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public partial class WindowOutline : Node
+    [GlobalClass]
+    public partial class WindowOutline : RichTextLabel
     {
-        [Export] RichTextLabel _outline;
-        public RichTextLabel outline => _outline;
         string _outlineText;
 
         public string outlineText
@@ -52,7 +51,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void SetOpacity(float alpha)
         {
-            _outline.Modulate = new Color(1, 1, 1, Mathf.Clamp(alpha, 0f, 1f));
+            Modulate = new Color(1, 1, 1, Mathf.Clamp(alpha, 0f, 1f));
         }
 
         public void SetOutline(int widthCount, int heightCount, WindowSetup setup, int titleOverride,
@@ -465,7 +464,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         void SetOutlineText(string text)
         {
-            _outline.Text = text;
+            Text = text;
         }
 
         internal void SetFocusAndAvailable(bool singleWindowOverride, bool inFocus, bool available, bool inInput)

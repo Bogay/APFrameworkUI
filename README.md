@@ -33,9 +33,9 @@ You can download this project from [releases page](https://github.com/dklassic/A
 This project can be installed via UPM. Before installing it, you need to set up the following dependencies.
 
 1.  **Set Scoped Registry for ZString**: This project depends on [Cysharp/ZString](https://github.com/Cysharp/ZString). To allow Unity's Package Manager to find it, add a scoped registry in `Project Settings > Package Manager`:
-    *   **Name**: `package.openupm.com`
-    *   **URL**: `https://packages.openupm.com`
-    *   **Scope(s)**: `com.cysharp.zstring`
+	*   **Name**: `package.openupm.com`
+	*   **URL**: `https://packages.openupm.com`
+	*   **Scope(s)**: `com.cysharp.zstring`
 2.  **Add Unsafe.dll**: The ZString package requires `System.Runtime.CompilerServices.Unsafe`, but the DLL is not included when installing via UPM. You must manually import it to your Unity project. You can download the DLL from its [NuGet page](https://www.nuget.org/packages/System.Runtime.CompilerServices.Unsafe/6.0.0). See [ZString's README](https://github.com/Cysharp/ZString?tab=readme-ov-file#unity) for more information.
 3.  **Import TextMesh Pro Essentials**: Ensure the TextMesh Pro package is installed, then import its essential resources via `Window > TextMesh Pro > Import TMP Essential Resources`.
 

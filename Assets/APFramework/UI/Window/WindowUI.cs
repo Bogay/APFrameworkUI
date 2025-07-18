@@ -15,7 +15,7 @@ namespace ChosenConcept.APFramework.UI.Window
         const int OUTLINE_PADDING = 1;
 
         [ExportGroup("Components")]
-        [Export] Control _transform;
+        // [Export] Control _transform;
         [Export] RichTextLabel _drawText;
         [Export] WindowOutline _outlineBuilder;
         [Export] WindowMask _windowMask;
@@ -46,7 +46,7 @@ namespace ChosenConcept.APFramework.UI.Window
         [Export] int _designatedHeight;
         [Export] bool _awaitDeactivate;
         [Export] bool _preciseSizeSync;
-        [Export] float _nextFunctionStringUpdate = -Mathf.Inf;
+        [Export] ulong _nextFunctionStringUpdate = ulong.MinValue;
         IStringLabel _windowLabel;
         IStringLabel _windowSubscript = new StringLabel("");
         List<WindowElement> _interactables = new();
@@ -101,6 +101,39 @@ namespace ChosenConcept.APFramework.UI.Window
         public bool hasEmbeddedTitle => setup.titleStyle == WindowTitleStyle.EmbeddedTitle;
         public bool hasOutline => setup.outlineStyle != WindowOutlineStyle.None;
         public bool isFullFrame => setup.outlineStyle == WindowOutlineStyle.FullFrame;
+
+        private WindowBackground getBackground()
+        {
+            // if (_background == null)
+            // {
+            //     _background = new WindowBackground();
+            //     _background.Name = "WindowBackground";
+            //     AddChild(_background);
+            // }
+            return _background;
+        }
+
+        private WindowOutline getOutline()
+        {
+            // if (_outlineBuilder == null)
+            // {
+            //     _outlineBuilder = new WindowOutline();
+            //     _outlineBuilder.Name = "WindowOutline";
+            //     AddChild(_outlineBuilder);
+            // }
+            return _outlineBuilder;
+        }
+
+        private WindowMask getMask()
+        {
+            // if (_windowMask == null)
+            // {
+            //     _windowMask = new WindowMask();
+            //     _windowMask.Name = "WindowMask";
+            //     AddChild(_windowMask);
+            // }
+            return _windowMask;
+        }
 
         public bool ContainsPosition(Vector2 position)
         {
@@ -195,9 +228,10 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void UpdateWindow()
         {
-            if (_active && _nextFunctionStringUpdate < Time.GetUnixTimeFromSystem())
+            if (_active && _nextFunctionStringUpdate < Engine.GetProcessFrames())
             {
-                _nextFunctionStringUpdate = (float)Time.GetUnixTimeFromSystem() + _setup.functionStringUpdateInterval;
+                // GD.Print($"{Name}: Update window: {Name}");
+                _nextFunctionStringUpdate = Engine.GetProcessFrames() + _setup.functionStringUpdateInterval;
                 CheckFunctionStringLabelDirty();
                 if (_setup.syncActiveValueAutomatically)
                 {
@@ -207,8 +241,8 @@ namespace ChosenConcept.APFramework.UI.Window
 
             if (!_active && !_awaitDeactivate)
                 return;
-            _windowMask.ContextUpdate();
-            if (_awaitDeactivate && !_windowMask.needUpdate)
+            this.getMask().ContextUpdate();
+            if (_awaitDeactivate && !this.getMask().needUpdate)
                 SetVisible(false);
         }
 
@@ -228,7 +262,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (!_active)
                 return;
             _drawText.Modulate = new Color(1, 1, 1, Mathf.Clamp(alpha, 0, 1));
-            _outlineBuilder.SetOpacity(alpha);
+            this.getOutline().SetOpacity(alpha);
         }
 
         public bool UpdateElementPosition(WindowElement element)
@@ -272,7 +306,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (hasOutline && setup.outlineDisplayStyle == WindowOutlineDisplayStyle.Always)
             {
                 // Note: This would need adaptation for Godot's text system
-                for (int i = 0; i <= _outlineBuilder.outline.GetParsedText().Length - 1; i++)
+                for (int i = 0; i <= this.getOutline().GetParsedText().Length - 1; i++)
                 {
                     // Placeholder for character position retrieval in Godot
                     Vector2 rangeBottomLeft = Vector2.Zero;
@@ -343,6 +377,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         void UpdateContent()
         {
+            GD.Print($"{Name}: Update content");
             if (_designatedWidth == 0 || _designatedHeight == 0)
             {
                 RefreshSize();
@@ -489,7 +524,9 @@ namespace ChosenConcept.APFramework.UI.Window
                         windowStringBuilder.Append(TextUtility.LineBreaker);
                 }
 
-                _drawText.Text = windowStringBuilder.ToString();
+                var content = windowStringBuilder.ToString();
+                GD.Print($"{Name}: set text: {content}");
+                _drawText.Text = content;
             }
         }
 
@@ -525,20 +562,20 @@ namespace ChosenConcept.APFramework.UI.Window
             var fontFile = new FontFile();
             theme.SetFontSize("normal_font_size", "RichTextLabel", (int)_setup.fontSize);
             _drawText.Theme = theme;
-            _outlineBuilder.outline.Theme = theme;
-            _windowMask.mask.Theme = theme;
+            this.getOutline().Theme = theme;
+            this.getMask().Theme = theme;
 
             SetActive(false);
             if (windowSetup.width != 0 && windowSetup.height != 0)
                 Resize(windowSetup.width, windowSetup.height);
             else if (windowSetup.width != 0 && windowSetup.height == 0)
                 Resize(windowSetup.width);
-            _background.SetColor(windowSetup.backgroundColor);
+            this.getBackground().SetColor(windowSetup.backgroundColor);
         }
 
         public void SetBackgroundColor(Color color)
         {
-            _background.SetColor(color, _active);
+            this.getBackground().SetColor(color, _active);
         }
 
         public void ChangeSetup(WindowSetup windowSetup)
@@ -548,8 +585,14 @@ namespace ChosenConcept.APFramework.UI.Window
 
         void SetLayout(int widthCount, int heightCount)
         {
-            CustomMinimumSize = new Vector2(setup.fontSize * 0.635f * widthCount, setup.fontSize * 1.05f * heightCount);
+            // FIXME: hard-coded values
+            const float widthFactor = 0.635f;
+            const float heightFactor = 1.05f * 2;
+            CustomMinimumSize = new Vector2(
+                setup.fontSize * widthFactor * widthCount,
+                setup.fontSize * heightFactor * heightCount);
             _layoutAlignment.UpdateLayout();
+            GD.Print($"{Name}: Set size: {CustomMinimumSize}");
             Size = CustomMinimumSize;
         }
 
@@ -717,13 +760,13 @@ namespace ChosenConcept.APFramework.UI.Window
 
         void SetupOutline(int width, int height, WindowSetup windowSetup, int titleOverride, int subLength)
         {
-            _outlineBuilder.SetOutline(width, height, windowSetup, titleOverride, subLength);
+            this.getOutline().SetOutline(width, height, windowSetup, titleOverride, subLength);
             _outlineReady = true;
         }
 
         void SetupMask(int width, int height, WindowSetup windowSetup)
         {
-            _windowMask.Setup(width, height, windowSetup);
+            this.getMask().Setup(width, height, windowSetup);
             _maskReady = true;
         }
 
@@ -837,6 +880,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (_active == v)
                 return;
             _active = v;
+            GD.Print($"{Name}: Set active: {_active}");
             if (_active)
             {
                 RefreshSize();
@@ -844,22 +888,22 @@ namespace ChosenConcept.APFramework.UI.Window
                     SetVisible(true);
                 _awaitDeactivate = false;
                 ResetAllWindowElement();
-                _outlineBuilder.SetActive(true);
+                this.getOutline().SetActive(true);
                 if (showMaskAnimation)
-                    _windowMask.FadeIn();
-                _background.SetActive(true);
+                    this.getMask().FadeIn();
+                this.getBackground().SetActive(true);
                 _drawText.Visible = true;
                 SyncActiveValue();
                 InvokeUpdate();
             }
             else
             {
-                _outlineBuilder.SetActive(false);
+                this.getOutline().SetActive(false);
                 if (showMaskAnimation)
-                    _windowMask.FadeOut();
+                    this.getMask().FadeOut();
                 _awaitDeactivate = true;
                 ResetAllWindowElement();
-                _background.SetActive(false);
+                this.getBackground().SetActive(false);
                 // Cancel out the next update
                 _isDirty = false;
                 _drawText.Text = string.Empty;
@@ -874,10 +918,10 @@ namespace ChosenConcept.APFramework.UI.Window
             }
         }
 
-        public void SetVisible(bool v)
-        {
-            Visible = v;
-        }
+        // public void SetVisible(bool v)
+        // {
+        //     Visible = v;
+        // }
 
         public void SetLabel(string label)
         {
@@ -922,17 +966,17 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void TriggerGlitch()
         {
-            if (_maskReady) _windowMask.TriggerGlitch();
+            if (_maskReady) this.getMask().TriggerGlitch();
         }
 
         public void TriggerEffect(WindowTransition transitionSetup)
         {
-            if (_maskReady) _windowMask.TriggerEffect(transitionSetup);
+            if (_maskReady) this.getMask().TriggerEffect(transitionSetup);
         }
 
         internal void SetMaskColor(Color color)
         {
-            _windowMask.SetColor(color);
+            this.getMask().SetColor(color);
         }
 
         public void SetInput(bool inInput)
@@ -940,7 +984,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (_inInput == inInput)
                 return;
             _inInput = inInput;
-            _outlineBuilder.SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
+            this.getOutline().SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
             _isDirty = true;
         }
 
@@ -949,7 +993,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (inFocus == _isFocused)
                 return;
             _isFocused = inFocus;
-            _outlineBuilder.SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
+            this.getOutline().SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
             _isDirty = true;
         }
 
@@ -958,7 +1002,7 @@ namespace ChosenConcept.APFramework.UI.Window
             if (_available == available)
                 return;
             _available = available;
-            _outlineBuilder.SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
+            this.getOutline().SetFocusAndAvailable(isSingleButtonWindow, _isFocused, _available, _inInput);
             _isDirty = true;
         }
 

@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://egbcxns7m12c"]
+
+[ext_resource type="FontFile" uid="uid://cuqbodg6wmfhy" path="res://Assets/APFramework/Resources/FontFiles/IBMPlexMono/IBMPlexMono-SemiBold.ttf" id="1_e7bfs"]
+
+[resource]
+default_font = ExtResource("1_e7bfs")
+default_font_size = 12

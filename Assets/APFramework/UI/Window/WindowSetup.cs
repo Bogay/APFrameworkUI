@@ -18,10 +18,10 @@ namespace ChosenConcept.APFramework.UI.Window
         [Export] WindowTransition _transitionOut;
         [Export] float _fontSize;
         [Export] Color _backgroundColor;
-        [Export] float _functionStringUpdateInterval;
+        [Export] ulong _functionStringUpdateInterval;
         [Export] bool _syncActiveValueAutomatically;
         public bool syncActiveValueAutomatically => _syncActiveValueAutomatically;
-        public float functionStringUpdateInterval => _functionStringUpdateInterval;
+        public ulong functionStringUpdateInterval => _functionStringUpdateInterval;
         public int width => _width;
         public int height => _height;
         public WindowTitleStyle titleStyle => _titleStyle;
@@ -47,7 +47,7 @@ namespace ChosenConcept.APFramework.UI.Window
             _transitionOut = WindowTransition.Glitch,
             _fontSize = 30,
             _backgroundColor = Color.Color8(0, 0, 0, 0),
-            _functionStringUpdateInterval = 0,
+            _functionStringUpdateInterval = 1,
             _syncActiveValueAutomatically = true
         };
 
@@ -131,7 +131,7 @@ namespace ChosenConcept.APFramework.UI.Window
             return this;
         }
 
-        public WindowSetup SetStringUpdateInterval(float updateInterval)
+        public WindowSetup SetStringUpdateInterval(ulong updateInterval)
         {
             _functionStringUpdateInterval = updateInterval;
             return this;

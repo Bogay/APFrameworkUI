@@ -5,6 +5,7 @@ using GodotInput = Godot.Input;
 
 namespace ChosenConcept.APFramework.UI.Provider
 {
+    [GlobalClass]
     public partial class TextInputProvider : Node, IMenuInputTarget
     {
         [Export] LineEdit _inputField;

@@ -5,7 +5,8 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Layout
 {
-    public partial class LayoutAlignment : Node
+    [GlobalClass]
+    public partial class LayoutAlignment : BoxContainer
     {
         [Export] Container _layoutGroup;
         [Export] LayoutSetup _layoutSetup;
@@ -21,6 +22,7 @@ namespace ChosenConcept.APFramework.UI.Layout
 
         public void UpdateLayout()
         {
+            Vertical = _layoutSetup.windowDirection == WindowDirection.Vertical;
             if (_layoutSetup.offsetSource == OffsetSource.CenterOfScreen)
             {
                 // consider the content size of all windows
@@ -89,9 +91,13 @@ namespace ChosenConcept.APFramework.UI.Layout
                     };
 
                     marginContainer.AddThemeConstantOverride("margin_top", topMargin);
+                    GD.Print($"{Name}: Set top margin: {topMargin}");
                     marginContainer.AddThemeConstantOverride("margin_bottom", bottomMargin);
+                    GD.Print($"{Name}: Set bottom margin: {bottomMargin}");
                     marginContainer.AddThemeConstantOverride("margin_left", leftMargin);
+                    GD.Print($"{Name}: Set left margin: {leftMargin}");
                     marginContainer.AddThemeConstantOverride("margin_right", rightMargin);
+                    GD.Print($"{Name}: Set right margin: {rightMargin}");
 
                     Vector2 multiplier = _layoutSetup.offsetType switch
                     {

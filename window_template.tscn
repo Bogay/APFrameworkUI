@@ -1,0 +1,63 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2je6x61my1io"]
+
+[ext_resource type="Script" uid="uid://hpiqc74ymm1x" path="res://Assets/APFramework/UI/Window/WindowUI.cs" id="1_f6u7a"]
+[ext_resource type="Script" uid="uid://xki7nmag1kho" path="res://Assets/APFramework/UI/Window/WindowBackground.cs" id="2_e2tuq"]
+[ext_resource type="Script" uid="uid://bepx4ggmkvuye" path="res://Assets/APFramework/UI/Window/WindowOutline.cs" id="3_jnsk3"]
+[ext_resource type="Script" uid="uid://b1cmtkne4b46w" path="res://Assets/APFramework/UI/Window/WindowMask.cs" id="4_tmstx"]
+
+[node name="WindowTemplate" type="Control" node_paths=PackedStringArray("_drawText", "_outlineBuilder", "_windowMask", "_background", "_layout")]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_f6u7a")
+_drawText = NodePath("ContentLabel")
+_outlineBuilder = NodePath("WindowOutline")
+_windowMask = NodePath("WindowMask")
+_background = NodePath("WindowBackground")
+_layout = NodePath(".")
+metadata/_custom_type_script = "uid://hpiqc74ymm1x"
+
+[node name="ContentLabel" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scroll_active = false
+
+[node name="WindowBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_e2tuq")
+metadata/_custom_type_script = "uid://xki7nmag1kho"
+
+[node name="WindowOutline" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_jnsk3")
+metadata/_custom_type_script = "uid://bepx4ggmkvuye"
+
+[node name="WindowMask" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_tmstx")
+metadata/_custom_type_script = "uid://b1cmtkne4b46w"

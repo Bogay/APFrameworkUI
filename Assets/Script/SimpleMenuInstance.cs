@@ -1,14 +1,16 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using ChosenConcept.APFramework.UI;
 using ChosenConcept.APFramework.UI.Layout;
 using ChosenConcept.APFramework.UI.Menu;
 using ChosenConcept.APFramework.UI.Window;
 using Godot;
 
+[GlobalClass]
 public partial class SimpleMenuInstance : Node
 {
     [Export] Godot.Collections.Array<LayoutSetup> _layoutSetups = new();
-    [Export] Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
+    Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
     bool _active;
 
     public override void _Ready()
@@ -17,9 +19,11 @@ public partial class SimpleMenuInstance : Node
         foreach (LayoutSetup layout in _layoutSetups)
         {
             MenuSetup setup = MenuSetup.defaultSetup;
+            Debug.Assert(layout != null, "LayoutSetup cannot be null");
             setup.SetAllowCloseMenuWithCancelAction(true);
             SimpleMenu menu = new(i.ToString(), setup, WindowSetup.defaultSetup, layout);
             _simpleMenus.Add(menu);
+            AddChild(menu);
             menu.AddText("Close all menu to quit");
             menu.AddSingleSelection("Test", obj => { })
                 .SetChoiceByValue(new List<string> { "1", "2", "3" });
@@ -29,6 +33,12 @@ public partial class SimpleMenuInstance : Node
             menu.AddButton("close", () => menu.CloseMenu());
             WindowManager.instance.RegisterMenu(menu);
             i++;
+        }
+
+        foreach (SimpleMenu menu in _simpleMenus)
+        {
+            menu.OpenMenu();
+            menu.ForceUpdateDisplayContent();
         }
     }
 

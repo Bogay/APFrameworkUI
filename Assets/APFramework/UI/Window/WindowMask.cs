@@ -4,7 +4,8 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI.Window
 {
-    public partial class WindowMask : Node
+    [GlobalClass]
+    public partial class WindowMask : RichTextLabel
     {
         enum FadeType
         {
@@ -17,8 +18,6 @@ namespace ChosenConcept.APFramework.UI.Window
         [Export] WindowTransition _windowTransitionIn = WindowTransition.Full;
         [Export] WindowTransition _windowTransitionOut = WindowTransition.FromLeftLagged;
         [Export] FadeType _currentFadeType = FadeType.FadeIn;
-        [Export] RichTextLabel _mask;
-        public RichTextLabel mask => _mask;
         string _maskText = TextUtility.FADE_IN;
         float _maskAnimationStep = 0.005f;
         int[,] _maskIndex;
@@ -34,7 +33,7 @@ namespace ChosenConcept.APFramework.UI.Window
 
         public void Initialize()
         {
-            mask.Modulate = Colors.White * 1.5f;
+            Modulate = Colors.White * 1.5f;
         }
 
         public void ContextUpdate()
@@ -49,7 +48,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 return;
             _endStep = 0;
             _currentStep = -1;
-            mask.Text = string.Empty;
+            Text = string.Empty;
             _nextUpdate = Mathf.Inf;
         }
 
@@ -117,7 +116,7 @@ namespace ChosenConcept.APFramework.UI.Window
                     windowStringBuilder.Append(TextUtility.LineBreaker);
                 }
 
-                mask.Text = windowStringBuilder.ToString();
+                Text = windowStringBuilder.ToString();
             }
         }
 
@@ -304,19 +303,19 @@ namespace ChosenConcept.APFramework.UI.Window
         {
             if (active)
             {
-                mask.Text = _maskText;
+                Text = _maskText;
                 _nextUpdate = -Mathf.Inf;
             }
             else
             {
-                mask.Text = string.Empty;
+                Text = string.Empty;
                 _nextUpdate = Mathf.Inf;
             }
         }
 
         public void SetColor(Color color)
         {
-            mask.Modulate = color;
+            Modulate = color;
         }
 
 

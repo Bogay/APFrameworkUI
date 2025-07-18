@@ -11,12 +11,14 @@ using Godot;
 
 namespace ChosenConcept.APFramework.UI
 {
+    [GlobalClass]
     public partial class WindowManager : Node, IMenuInputTarget
     {
         static WindowManager _instance;
         public static WindowManager instance => _instance;
 
         [Export] WindowUI _windowTemplate;
+        [Export] PackedScene _windowTemplateScene;
         [Export] CanvasLayer _layerTemplate;
         [Export] Control _layoutTemplate;
         [Export] TextureRect _backgroundTemplate;
@@ -24,7 +26,7 @@ namespace ChosenConcept.APFramework.UI
         // [Export] SelectionProvider _selectionProvider;
         // [Export] ConfirmationProvider _confirmationProvider;
         // [Export] ContextMenuProvider _contextMenuProvider;
-        [Export] Camera2D _interfaceCamera;
+        Camera2D _interfaceCamera;
         [Export] Godot.Collections.Array<WindowUI> _windows = new();
         [Export] Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
         [Export] Godot.Collections.Array<LayoutAlignment> _layoutAlignments = new();
@@ -118,9 +120,12 @@ namespace ChosenConcept.APFramework.UI
         public override void _Ready()
         {
             _instance ??= this;
-            _inputProvider = new GodotInputProvider();
+            var godotInputProvider = new GodotInputProvider();
+            AddChild(godotInputProvider);
+            _inputProvider = godotInputProvider;
             _inputProvider.SetTarget(this);
             _inputProvider.EnableInput(true);
+            _interfaceCamera = GetViewport().GetCamera2D();
             // _contextMenuProvider.Initialize();
         }
 
@@ -136,6 +141,7 @@ namespace ChosenConcept.APFramework.UI
 
             foreach (WindowUI window in _windows)
             {
+                // GD.Print($"{Name}: Update window: {window.Name}");
                 window.UpdateWindow();
             }
 
@@ -159,12 +165,10 @@ namespace ChosenConcept.APFramework.UI
 
             foreach (SimpleMenu system in _simpleMenus)
             {
+                // GD.Print($"{Name}: Update simple menu: {system.Name}");
                 system.UpdateMenu();
             }
-        }
 
-        void LateUpdate()
-        {
             foreach (WindowUI window in _windows)
             {
                 window.ContextLateUpdate();
@@ -260,15 +264,6 @@ namespace ChosenConcept.APFramework.UI
             newLayout.AddChild(layoutAlignment);
             _layoutAlignments.Add(layoutAlignment);
 
-            Container layoutGroup = layoutSetup.windowDirection switch
-            {
-                WindowDirection.Vertical => new VBoxContainer(),
-                WindowDirection.Horizontal => new HBoxContainer(),
-                _ => throw new NotImplementedException(),
-            };
-
-            newLayout.AddChild(layoutGroup);
-
             // Convert Unity TextAnchor to Godot alignment
             Control.GrowDirection growDirection = layoutSetup.windowAlignment switch
             {
@@ -284,7 +279,7 @@ namespace ChosenConcept.APFramework.UI
                 _ => throw new System.NotImplementedException(),
             };
 
-            layoutAlignment.Initialize(layoutGroup, layoutSetup);
+            layoutAlignment.Initialize(layoutAlignment, layoutSetup);
             if (layoutName != string.Empty)
                 newLayout.Name = layoutName;
             newLayout.Visible = true;
@@ -322,7 +317,9 @@ namespace ChosenConcept.APFramework.UI
         WindowUI InstantiateWindow(string windowName, LayoutSetup layoutSetup)
         {
             LayoutAlignment layout = InstantiateLayout(layoutSetup);
-            WindowUI window = _windowTemplate.Duplicate() as WindowUI;
+            // WindowUI window = _windowTemplate.Duplicate((int)DuplicateFlags.UseInstantiation) as WindowUI;
+            WindowUI window = this._windowTemplateScene.Instantiate<WindowUI>();
+            window.SetVisible(true);
             layout.AddChild(window);
             layout.RegisterWindow(window);
             layout.Name = windowName;
@@ -334,7 +331,8 @@ namespace ChosenConcept.APFramework.UI
 
         WindowUI InstantiateWindow(string windowName, LayoutAlignment layout)
         {
-            WindowUI window = _windowTemplate.Duplicate() as WindowUI;
+            // WindowUI window = _windowTemplate.Duplicate() as WindowUI;
+            WindowUI window = this._windowTemplateScene.Instantiate<WindowUI>();
             layout.AddChild(window);
             layout.RegisterWindow(window);
             window.Name = windowName;
@@ -355,6 +353,7 @@ namespace ChosenConcept.APFramework.UI
             if (_simpleMenus.Contains(menu))
                 return;
             _simpleMenus.Add(menu);
+            GD.Print($"{Name}: Register menu: {menu.Name}");
         }
 
         public void ClearAllWindowLocation()
