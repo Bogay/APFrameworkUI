@@ -8,7 +8,7 @@ namespace ChosenConcept.APFramework.UI.Input
     [GlobalClass]
     public partial class GodotInputProvider : Node, IInputProvider
     {
-        bool _inputEnabled;
+        [Export] bool _inputEnabled;
         Vector2 _lastMovement;
         Vector2 _mouseDelta;
         Vector2 _lastMousePosition;
@@ -37,13 +37,13 @@ namespace ChosenConcept.APFramework.UI.Input
             Vector2 movement = Vector2.Zero;
 
             // Handle keyboard input
-            if (GodotInput.IsActionPressed("ui_up") || GodotInput.IsKeyPressed(Key.W))
+            if (GodotInput.IsActionPressed("ui_up"))
                 movement.Y = 1.0f;
-            if (GodotInput.IsActionPressed("ui_down") || GodotInput.IsKeyPressed(Key.S))
+            if (GodotInput.IsActionPressed("ui_down"))
                 movement.Y = -1.0f;
-            if (GodotInput.IsActionPressed("ui_left") || GodotInput.IsKeyPressed(Key.A))
+            if (GodotInput.IsActionPressed("ui_left"))
                 movement.X = -1.0f;
-            if (GodotInput.IsActionPressed("ui_right") || GodotInput.IsKeyPressed(Key.D))
+            if (GodotInput.IsActionPressed("ui_right"))
                 movement.X = 1.0f;
 
             // Handle gamepad input (if available)
@@ -52,11 +52,17 @@ namespace ChosenConcept.APFramework.UI.Input
                 movement = leftStick;
 
             // Handle confirm/cancel input
-            if (GodotInput.IsActionJustPressed("ui_accept") || GodotInput.IsKeyPressed(Key.Space) || GodotInput.IsKeyPressed(Key.Enter))
+            if (GodotInput.IsActionJustPressed("ui_accept"))
+            {
+                GD.Print($"{Name}: OnConfirm");
                 _activeTarget?.OnConfirm();
+            }
 
-            if (GodotInput.IsActionJustPressed("ui_cancel") || GodotInput.IsKeyPressed(Key.Escape))
+            if (GodotInput.IsActionJustPressed("ui_cancel"))
+            {
+                GD.Print($"{Name}: OnCancel");
                 _activeTarget?.OnCancel();
+            }
 
             // Handle mouse input
             Vector2 currentMousePosition = GetViewport().GetMousePosition();
@@ -89,6 +95,7 @@ namespace ChosenConcept.APFramework.UI.Input
             // Handle movement changes
             if (_lastMovement != movement)
             {
+                GD.Print($"{Name}: OnMove {movement}");
                 if (movement.Length() > 0.5f)
                 {
                     _activeTarget?.OnMove(movement);

@@ -63,13 +63,13 @@ namespace ChosenConcept.APFramework.UI.Utility
             int lower = 0;
             foreach (var c in text)
             {
-                if (c == '<')
+                if (c == '[')
                 {
                     upper++;
                     if (upper > 1)
                         break;
                 }
-                else if (c == '>')
+                else if (c == ']')
                 {
                     lower++;
                     if (lower > 1)
@@ -77,7 +77,7 @@ namespace ChosenConcept.APFramework.UI.Utility
                 }
             }
 
-            return text.StartsWith("<") && text.EndsWith(">") && upper == 1 &&
+            return text.StartsWith("[") && text.EndsWith("]") && upper == 1 &&
                    lower == 1;
         }
 
@@ -111,14 +111,14 @@ namespace ChosenConcept.APFramework.UI.Utility
                         char c = richStr[index];
                         if (tag)
                         {
-                            if (c == '>')
+                            if (c == ']')
                             {
                                 tag = false;
                             }
                         }
                         else
                         {
-                            if (c == '<')
+                            if (c == '[')
                             {
                                 tag = true;
                             }
@@ -153,14 +153,14 @@ namespace ChosenConcept.APFramework.UI.Utility
                     char c = richStr[index];
                     if (tag)
                     {
-                        if (c == '>')
+                        if (c == ']')
                         {
                             tag = false;
                         }
                     }
                     else
                     {
-                        if (c == '<')
+                        if (c == '[')
                         {
                             tag = true;
                         }
@@ -194,14 +194,14 @@ namespace ChosenConcept.APFramework.UI.Utility
                     char c = builderString[index];
                     if (tag)
                     {
-                        if (c == '>')
+                        if (c == ']')
                         {
                             tag = false;
                         }
                     }
                     else
                     {
-                        if (c == '<')
+                        if (c == '[')
                         {
                             tag = true;
                         }
@@ -239,14 +239,14 @@ namespace ChosenConcept.APFramework.UI.Utility
                     char c = text[index];
                     if (tag)
                     {
-                        if (c == '>')
+                        if (c == ']')
                         {
                             tag = false;
                         }
                     }
                     else
                     {
-                        if (c == '<')
+                        if (c == '[')
                         {
                             tag = true;
                         }
@@ -271,7 +271,7 @@ namespace ChosenConcept.APFramework.UI.Utility
         public static List<string> SplitStringByControlCode(string input)
         {
             // Define a regex pattern to match the control codes and text outside of them
-            string pattern = @"(<[^>]+>)|([^<]+)";
+            string pattern = @"(\[[^]]+\])|([^[]+)";
 
             List<string> result = new List<string>();
             Regex regex = new(pattern);

@@ -29,7 +29,7 @@ public partial class SimpleMenuInstance : Node
                 .SetChoiceByValue(new List<string> { "1", "2", "3" });
             menu.AddSlider("slider")
                 .SetChoiceByValue(new[] { "0", "1", "2", "3" })
-                .SetAction(x => GD.Print(x));
+                .SetAction(x => GD.Print($"slider value: {x}"));
             menu.AddButton("close", () => menu.CloseMenu());
             WindowManager.instance.RegisterMenu(menu);
             i++;
@@ -40,6 +40,8 @@ public partial class SimpleMenuInstance : Node
             menu.OpenMenu();
             menu.ForceUpdateDisplayContent();
         }
+
+        _simpleMenus[0].LinkInput();
     }
 
     public override void _Process(double delta)

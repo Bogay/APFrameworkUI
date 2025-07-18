@@ -525,7 +525,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 }
 
                 var content = windowStringBuilder.ToString();
-                GD.Print($"{Name}: set text: {content}");
+                // GD.Print($"{Name}: set text: {content}");
                 _drawText.Text = content;
             }
         }

@@ -121,6 +121,7 @@ namespace ChosenConcept.APFramework.UI
         {
             _instance ??= this;
             var godotInputProvider = new GodotInputProvider();
+            godotInputProvider.Name = "GodotInputProvider";
             AddChild(godotInputProvider);
             _inputProvider = godotInputProvider;
             _inputProvider.SetTarget(this);

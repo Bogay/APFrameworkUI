@@ -11,7 +11,7 @@ namespace ChosenConcept.APFramework.UI.Utility
 
         public static string StringColored(string text, Color color)
         {
-            return ZString.Concat("<color=#", color.ToHtml(), ">", text, "</color>");
+            return ZString.Concat("[color=#", color.ToHtml(), "]", text, "[/color]").Trim();
         }
 
         public static string StringColoredRange(string text, Color color, int min, int max)

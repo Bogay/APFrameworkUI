@@ -116,7 +116,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_displayActive)
                 return;
-            if (!_navigationActive && (Time.GetTicksMsec() / 1000_000) >= _nextNavigationUpdate)
+            if (!_navigationActive && (Time.GetTicksMsec() / 1000) >= _nextNavigationUpdate)
                 _navigationActive = true;
             UpdateNavigation();
         }
@@ -125,17 +125,21 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_windowInstance.canNavigate || _linkFrame == Engine.GetProcessFrames())
                 return;
-            if (_movingWindow)
+            // if (_movingWindow)
+            // {
+            //     _windowInstance.Move(WindowManager.instance.inputProvider.mouseDelta);
+            //     return;
+            // }
+
+            // UpdateMouseNavigation();
+            var currentTime = Time.GetTicksMsec() / 1000;
+            if (currentTime < _nextNavigationUpdate)
             {
-                _windowInstance.Move(WindowManager.instance.inputProvider.mouseDelta);
+                // GD.Print($"{Name}: UpdateNavigation (skipped) - next update {_nextNavigationUpdate} / {currentTime}");
                 return;
             }
-
-            UpdateMouseNavigation();
-            if ((Time.GetTicksMsec() / 1000_000) < _nextNavigationUpdate)
-                return;
             UpdateWindowPosition();
-            if (float.IsPositiveInfinity(_holdStart) || _holdNavigationNext <= (Time.GetTicksMsec() / 1000_000))
+            if (float.IsPositiveInfinity(_holdStart) || _holdNavigationNext <= currentTime)
             {
                 UpdateSelection();
             }
@@ -147,6 +151,8 @@ namespace ChosenConcept.APFramework.UI.Menu
                 _selectionUpdated = false;
                 OnSelectionUpdate();
             }
+
+            GD.Print($"{Name}: UpdateNavigation done");
         }
 
         public void ForceUpdateDisplayContent()
@@ -329,6 +335,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void LinkInput()
         {
+            GD.Print($"{Name}: Link input");
             _linkFrame = Engine.GetProcessFrames();
             ResetInput();
             WindowManager.instance.LinkInputTarget(this);
@@ -407,6 +414,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void UpdateSelection()
         {
+            GD.Print($"{Name}: UpdateSelection");
             if (!_navigationActive)
                 return;
             bool mouseScrollOverride = false;
@@ -512,14 +520,14 @@ namespace ChosenConcept.APFramework.UI.Menu
             {
                 if (float.IsPositiveInfinity(_holdStart))
                 {
-                    _holdStart = (Time.GetTicksMsec() / 1000_000);
+                    _holdStart = (Time.GetTicksMsec() / 1000);
                 }
-                else if ((Time.GetTicksMsec() / 1000_000) - _holdStart >= _menuSetup.holdNavigationDelay &&
+                else if ((Time.GetTicksMsec() / 1000) - _holdStart >= _menuSetup.holdNavigationDelay &&
                          (float.IsPositiveInfinity(_holdNavigationNext) ||
-                          (Time.GetTicksMsec() / 1000_000) >= _holdNavigationNext))
+                          (Time.GetTicksMsec() / 1000) >= _holdNavigationNext))
                 {
-                    _holdNavigationNext = (Time.GetTicksMsec() / 1000_000) + _menuSetup.holdNavigationInterval /
-                        Mathf.CeilToInt(((Time.GetTicksMsec() / 1000_000) - _holdStart - _menuSetup.holdNavigationDelay) /
+                    _holdNavigationNext = (Time.GetTicksMsec() / 1000) + _menuSetup.holdNavigationInterval /
+                        Mathf.CeilToInt(((Time.GetTicksMsec() / 1000) - _holdStart - _menuSetup.holdNavigationDelay) /
                                         _menuSetup.holdNavigationSpeedUpInterval);
                 }
             }
@@ -652,6 +660,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void IMenuInputTarget.OnMove(Vector2 vector2)
         {
+            GD.Print($"{Name}: OnMove {vector2}");
             _move = vector2;
         }
 
@@ -662,11 +671,13 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void IMenuInputTarget.OnCancel()
         {
+            GD.Print($"{Name}: OnCancel");
             CancelSelection();
         }
 
         void IMenuInputTarget.OnConfirm()
         {
+            GD.Print($"{Name}: OnConfirm");
             ConfirmSelection();
         }
 
@@ -871,7 +882,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void ClearWindowLocation(float delay = .1f)
         {
-            if (_nextNavigationUpdate < (Time.GetTicksMsec() / 1000_000) + delay)
+            if (_nextNavigationUpdate < (Time.GetTicksMsec() / 1000) + delay)
             {
                 DelayInput(delay);
             }
@@ -951,7 +962,7 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void DelayInput(float delay)
         {
-            _nextNavigationUpdate = (Time.GetTicksMsec() / 1000_000) + delay;
+            _nextNavigationUpdate = (Time.GetTicksMsec() / 1000) + delay;
         }
 
         public void SetFocused(bool focused)
