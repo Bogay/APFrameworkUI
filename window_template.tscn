@@ -51,6 +51,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 bbcode_enabled = true
+scroll_active = false
 script = ExtResource("3_jnsk3")
 metadata/_custom_type_script = "uid://bepx4ggmkvuye"
 
@@ -62,5 +63,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 bbcode_enabled = true
+scroll_active = false
 script = ExtResource("4_tmstx")
 metadata/_custom_type_script = "uid://b1cmtkne4b46w"

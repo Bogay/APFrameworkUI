@@ -116,7 +116,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_displayActive)
                 return;
-            if (!_navigationActive && (Time.GetTicksMsec() / 1000) >= _nextNavigationUpdate)
+            if (!_navigationActive && (this.currentTime()) >= _nextNavigationUpdate)
                 _navigationActive = true;
             UpdateNavigation();
         }
@@ -125,14 +125,16 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             if (!_windowInstance.canNavigate || _linkFrame == Engine.GetProcessFrames())
                 return;
-            // if (_movingWindow)
-            // {
-            //     _windowInstance.Move(WindowManager.instance.inputProvider.mouseDelta);
-            //     return;
-            // }
+#if AUTOPANIC_GODOT_MOUSE_ENABLED
+            if (_movingWindow)
+            {
+                _windowInstance.Move(WindowManager.instance.inputProvider.mouseDelta);
+                return;
+            }
+#endif
 
-            // UpdateMouseNavigation();
-            var currentTime = Time.GetTicksMsec() / 1000;
+            UpdateMouseNavigation();
+            var currentTime = this.currentTime();
             if (currentTime < _nextNavigationUpdate)
             {
                 // GD.Print($"{Name}: UpdateNavigation (skipped) - next update {_nextNavigationUpdate} / {currentTime}");
@@ -255,6 +257,10 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void UpdateMouseNavigation()
         {
+#if !AUTOPANIC_GODOT_MOUSE_ENABLED
+            return;
+#endif
+
             if (!_displayActive || !WindowManager.instance.inputProvider.inputEnabled ||
                 _lastMousePosition == WindowManager.instance.inputProvider.mousePosition ||
                 !WindowManager.instance.inputProvider.hasMouse || _windowInstance == null
@@ -414,15 +420,18 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         void UpdateSelection()
         {
-            GD.Print($"{Name}: UpdateSelection");
+            // GD.Print($"{Name}: UpdateSelection @ {this.currentTime()}");
             if (!_navigationActive)
                 return;
+
             bool mouseScrollOverride = false;
+#if AUTOPANIC_GODOT_MOUSE_ENABLED
             if (_move.LengthSquared() < _mouseScroll.LengthSquared())
             {
                 _move = _mouseScroll;
                 mouseScrollOverride = true;
             }
+#endif
 
             if (_move.Length() < .5f)
                 return;
@@ -520,14 +529,14 @@ namespace ChosenConcept.APFramework.UI.Menu
             {
                 if (float.IsPositiveInfinity(_holdStart))
                 {
-                    _holdStart = (Time.GetTicksMsec() / 1000);
+                    _holdStart = (this.currentTime());
                 }
-                else if ((Time.GetTicksMsec() / 1000) - _holdStart >= _menuSetup.holdNavigationDelay &&
+                else if ((this.currentTime()) - _holdStart >= _menuSetup.holdNavigationDelay &&
                          (float.IsPositiveInfinity(_holdNavigationNext) ||
-                          (Time.GetTicksMsec() / 1000) >= _holdNavigationNext))
+                          (this.currentTime()) >= _holdNavigationNext))
                 {
-                    _holdNavigationNext = (Time.GetTicksMsec() / 1000) + _menuSetup.holdNavigationInterval /
-                        Mathf.CeilToInt(((Time.GetTicksMsec() / 1000) - _holdStart - _menuSetup.holdNavigationDelay) /
+                    _holdNavigationNext = (this.currentTime()) + _menuSetup.holdNavigationInterval /
+                        Mathf.CeilToInt(((this.currentTime()) - _holdStart - _menuSetup.holdNavigationDelay) /
                                         _menuSetup.holdNavigationSpeedUpInterval);
                 }
             }
@@ -882,7 +891,8 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void ClearWindowLocation(float delay = .1f)
         {
-            if (_nextNavigationUpdate < (Time.GetTicksMsec() / 1000) + delay)
+            GD.Print($"{Name}: ClearWindowLocation");
+            if (_nextNavigationUpdate < (this.currentTime()) + delay)
             {
                 DelayInput(delay);
             }
@@ -962,7 +972,8 @@ namespace ChosenConcept.APFramework.UI.Menu
 
         public void DelayInput(float delay)
         {
-            _nextNavigationUpdate = (Time.GetTicksMsec() / 1000) + delay;
+            // GD.Print($"{Name}: DelayInput {delay}");
+            _nextNavigationUpdate = (this.currentTime()) + delay;
         }
 
         public void SetFocused(bool focused)
@@ -996,5 +1007,7 @@ namespace ChosenConcept.APFramework.UI.Menu
             tags.AddRange(_windowInstance.ExportLocalizationTag());
             return tags;
         }
+
+        private float currentTime() => Time.GetTicksMsec() / 1000.0f;
     }
 }
