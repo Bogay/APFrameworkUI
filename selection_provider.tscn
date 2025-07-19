@@ -1,0 +1,49 @@
+[gd_scene load_steps=8 format=3 uid="uid://cumuph0y4ae0f"]
+
+[ext_resource type="Script" uid="uid://bnxsaal8dwve1" path="res://Assets/APFramework/UI/Provider/SelectionProvider.cs" id="1_cjtii"]
+[ext_resource type="Script" uid="uid://d3mbtcv05bj1v" path="res://Assets/APFramework/UI/Layout/LayoutSetup.cs" id="2_gqvy7"]
+[ext_resource type="Script" uid="uid://cg6kilxpseu2y" path="res://Assets/APFramework/UI/Window/WindowSetup.cs" id="3_gqvy7"]
+[ext_resource type="Script" uid="uid://byyvm07sx1nlg" path="res://Assets/APFramework/UI/Menu/MenuStyling.cs" id="3_qqdxp"]
+
+[sub_resource type="Resource" id="Resource_4c57u"]
+script = ExtResource("2_gqvy7")
+_menuLayer = 2
+_windowAlignment = 4
+_windowDirection = 0
+_offsetSource = 0
+_offsetType = 0
+_offset = Vector4(0, 0, 0, 0)
+_spacing = 0
+metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
+
+[sub_resource type="Resource" id="Resource_qqdxp"]
+script = ExtResource("3_gqvy7")
+_width = 0
+_height = 0
+_titleStyle = 0
+_outlineStyle = 0
+_outlineDisplayStyle = 0
+_thickenStyle = 0
+_labelStyle = 0
+_transitionIn = 0
+_transitionOut = 0
+_fontSize = 0.0
+_backgroundColor = Color(0, 0, 0, 0)
+_functionStringUpdateInterval = 0
+_syncActiveValueAutomatically = false
+metadata/_custom_type_script = "uid://cg6kilxpseu2y"
+
+[sub_resource type="Resource" id="Resource_efxa6"]
+script = ExtResource("3_qqdxp")
+_windowSetup = SubResource("Resource_qqdxp")
+_layoutSetup = SubResource("Resource_4c57u")
+metadata/_custom_type_script = "uid://byyvm07sx1nlg"
+
+[node name="SelectionProvider" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_cjtii")
+_menuStyling = SubResource("Resource_efxa6")
+metadata/_custom_type_script = "uid://bnxsaal8dwve1"

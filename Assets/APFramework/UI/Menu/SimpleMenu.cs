@@ -18,7 +18,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         [Export] MenuStyling _menuStyling;
         [Export] WindowUI _windowInstance;
         [Export] LayoutAlignment _layoutAlignmentInstance;
-        [Export] bool _displayActive;
+        [Export] protected bool _displayActive;
         [Export] bool _navigationActive;
         [Export] ulong _linkFrame = ulong.MaxValue;
         [Export] float _nextNavigationUpdate = Mathf.Inf;
@@ -153,8 +153,6 @@ namespace ChosenConcept.APFramework.UI.Menu
                 _selectionUpdated = false;
                 OnSelectionUpdate();
             }
-
-            GD.Print($"{Name}: UpdateNavigation done");
         }
 
         public void ForceUpdateDisplayContent()
@@ -226,10 +224,10 @@ namespace ChosenConcept.APFramework.UI.Menu
         {
             ClearWindowLocation();
             _currentSelection = -1;
-            _windowInstance.ClearElements();
+            _windowInstance?.ClearElements();
             if (removeWindow)
             {
-                _windowInstance.Close();
+                _windowInstance?.Close();
                 _windowInstance = null;
             }
         }
@@ -819,8 +817,10 @@ namespace ChosenConcept.APFramework.UI.Menu
         bool SelectionAction(ISelectable selection)
         {
             UnlinkInput();
-            // WindowManager.instance.GetSelectionInput(this,
-            //     selection.values, selection.activeCount);
+            WindowManager.instance.GetSelectionInput(
+                this,
+                selection.values,
+                selection.activeCount);
             return true;
         }
 
@@ -892,12 +892,12 @@ namespace ChosenConcept.APFramework.UI.Menu
         public void ClearWindowLocation(float delay = .1f)
         {
             GD.Print($"{Name}: ClearWindowLocation");
-            if (_nextNavigationUpdate < (this.currentTime()) + delay)
+            if (_nextNavigationUpdate < this.currentTime() + delay)
             {
                 DelayInput(delay);
             }
 
-            _windowInstance.ClearCachedPosition();
+            _windowInstance?.ClearCachedPosition();
         }
 
         public bool OpenMenu()

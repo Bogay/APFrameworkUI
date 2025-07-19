@@ -593,7 +593,7 @@ namespace ChosenConcept.APFramework.UI.Window
                 setup.fontSize * heightFactor * heightCount);
             _layoutAlignment.UpdateLayout();
             GD.Print($"{Name}: Set size: {CustomMinimumSize}");
-            Size = CustomMinimumSize;
+            SetDeferred(Control.PropertyName.Size, CustomMinimumSize);
         }
 
         /// <summary>

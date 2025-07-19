@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://sid6asbchic7"]
+[gd_scene load_steps=11 format=3 uid="uid://sid6asbchic7"]
 
 [ext_resource type="Script" uid="uid://dbmvwtls5c6mm" path="res://Assets/APFramework/UI/WindowManager.cs" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://d2je6x61my1io" path="res://window_template.tscn" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://bwvqxeydvbc4m" path="res://icon.svg" id="3_7mycd"]
+[ext_resource type="PackedScene" uid="uid://cumuph0y4ae0f" path="res://selection_provider.tscn" id="3_272bh"]
 [ext_resource type="Script" uid="uid://covhi7kpxh6jo" path="res://Assets/APFramework/UI/Provider/TextInputProvider.cs" id="6_7mycd"]
 [ext_resource type="Script" uid="uid://ddb5250wv0mj1" path="res://Assets/Script/SimpleMenuInstance.cs" id="7_272bh"]
 [ext_resource type="Script" uid="uid://d3mbtcv05bj1v" path="res://Assets/APFramework/UI/Layout/LayoutSetup.cs" id="8_5vw27"]
@@ -10,7 +11,29 @@
 [sub_resource type="Resource" id="Resource_kek77"]
 script = ExtResource("8_5vw27")
 _menuLayer = 0
-_windowAlignment = 0
+_windowAlignment = 6
+_windowDirection = 0
+_offsetSource = 0
+_offsetType = 0
+_offset = Vector4(0, 0, 0, 0)
+_spacing = 0
+metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
+
+[sub_resource type="Resource" id="Resource_272bh"]
+script = ExtResource("8_5vw27")
+_menuLayer = 0
+_windowAlignment = 4
+_windowDirection = 0
+_offsetSource = 0
+_offsetType = 0
+_offset = Vector4(0, 0, 0, 0)
+_spacing = 0
+metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
+
+[sub_resource type="Resource" id="Resource_5vw27"]
+script = ExtResource("8_5vw27")
+_menuLayer = 0
+_windowAlignment = 2
 _windowDirection = 0
 _offsetSource = 0
 _offsetType = 0
@@ -24,15 +47,11 @@ metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
 script = ExtResource("1_ig7tw")
 _windowTemplateScene = ExtResource("2_lquwl")
 _layerTemplate = NodePath("LayerTemplate")
-_layoutTemplate = NodePath("LayoutTemplate")
+_layoutTemplate = NodePath("")
 _backgroundTemplate = NodePath("BackgroundTemplate")
 _textInputProvider = NodePath("TextInputProvider")
+_selectionProviderScene = ExtResource("3_272bh")
 metadata/_custom_type_script = "uid://dbmvwtls5c6mm"
-
-[node name="LayoutTemplate" type="HBoxContainer" parent="WindowManager"]
-visible = false
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="LayerTemplate" type="CanvasLayer" parent="WindowManager"]
 visible = false
@@ -49,5 +68,5 @@ metadata/_custom_type_script = "uid://covhi7kpxh6jo"
 
 [node name="SimpleMenuInstance" type="Node" parent="."]
 script = ExtResource("7_272bh")
-_layoutSetups = Array[ExtResource("8_5vw27")]([SubResource("Resource_kek77")])
+_layoutSetups = Array[ExtResource("8_5vw27")]([SubResource("Resource_kek77"), SubResource("Resource_272bh"), SubResource("Resource_5vw27")])
 metadata/_custom_type_script = "uid://ddb5250wv0mj1"

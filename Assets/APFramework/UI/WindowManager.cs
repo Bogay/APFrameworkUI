@@ -23,7 +23,8 @@ namespace ChosenConcept.APFramework.UI
         [Export] Control _layoutTemplate;
         [Export] TextureRect _backgroundTemplate;
         [Export] TextInputProvider _textInputProvider;
-        // [Export] SelectionProvider _selectionProvider;
+        [Export] PackedScene _selectionProviderScene;
+        SelectionProvider _selectionProvider;
         // [Export] ConfirmationProvider _confirmationProvider;
         // [Export] ContextMenuProvider _contextMenuProvider;
         Camera2D _interfaceCamera;
@@ -42,6 +43,7 @@ namespace ChosenConcept.APFramework.UI
         // public bool providerActive => _selectionProvider.active || _textInputProvider.active ||
         //   _confirmationProvider.active ||
         //   _contextMenuProvider.active;
+        public bool providerActive => (_selectionProvider?.active ?? true) || _textInputProvider.active;
 
 
         public void EnableGlobalVisibility(bool enable)
@@ -89,13 +91,13 @@ namespace ChosenConcept.APFramework.UI
             _textInputProvider.GetTextInput(sourceUI, text);
         }
 
-        // public void GetSelectionInput(IMenuInputTarget sourceUI, List<string> choices,
-        //     int currentChoice)
-        // {
-        //     EnableGlobalVisibility(false);
+        public void GetSelectionInput(IMenuInputTarget sourceUI, List<string> choices,
+            int currentChoice)
+        {
+            EnableGlobalVisibility(false);
 
-        //     _selectionProvider.GetSelection(sourceUI, choices, currentChoice);
-        // }
+            _selectionProvider.GetSelection(sourceUI, choices, currentChoice);
+        }
 
         public void EndSelectionInput()
         {
@@ -120,14 +122,20 @@ namespace ChosenConcept.APFramework.UI
         public override void _Ready()
         {
             _instance ??= this;
+
             var godotInputProvider = new GodotInputProvider();
             godotInputProvider.Name = "GodotInputProvider";
             AddChild(godotInputProvider);
             _inputProvider = godotInputProvider;
             _inputProvider.SetTarget(this);
             _inputProvider.EnableInput(true);
+
             _interfaceCamera = GetViewport().GetCamera2D();
             // _contextMenuProvider.Initialize();
+
+            _selectionProvider = _selectionProviderScene.Instantiate<SelectionProvider>();
+            _selectionProvider.Name = "SelectionProvider";
+            AddChild(_selectionProvider);
         }
 
         public override void _Process(double delta)
@@ -146,13 +154,13 @@ namespace ChosenConcept.APFramework.UI
                 window.UpdateWindow();
             }
 
-            // if (providerActive)
-            // {
-            //     _confirmationProvider.UpdateMenu();
-            //     _contextMenuProvider.UpdateMenu();
-            //     _selectionProvider.UpdateMenu();
-            //     return;
-            // }
+            if (providerActive)
+            {
+                // _confirmationProvider.UpdateMenu();
+                // _contextMenuProvider.UpdateMenu();
+                _selectionProvider.UpdateMenu();
+                return;
+            }
 
             // // When any provider is active, disable interaction of menus
             // foreach (CompositeMenuMono system in _compositeMenuMonos)
@@ -259,32 +267,64 @@ namespace ChosenConcept.APFramework.UI
         public LayoutAlignment InstantiateLayout(LayoutSetup layoutSetup, string layoutName = "")
         {
             CanvasLayer targetLayer = InstantiateLayer(layoutSetup.MenuLayer);
-            Control newLayout = _layoutTemplate.Duplicate() as Control;
-            targetLayer.AddChild(newLayout);
             LayoutAlignment layoutAlignment = new LayoutAlignment();
-            newLayout.AddChild(layoutAlignment);
+            targetLayer.AddChild(layoutAlignment);
             _layoutAlignments.Add(layoutAlignment);
 
             // Convert Unity TextAnchor to Godot alignment
-            Control.GrowDirection growDirection = layoutSetup.windowAlignment switch
+            switch (layoutSetup.windowDirection)
             {
-                WindowAlignment.UpperLeft => Control.GrowDirection.End,
-                WindowAlignment.UpperCenter => Control.GrowDirection.End,
-                WindowAlignment.UpperRight => Control.GrowDirection.End,
-                WindowAlignment.MiddleLeft => Control.GrowDirection.Both,
-                WindowAlignment.MiddleCenter => Control.GrowDirection.Both,
-                WindowAlignment.MiddleRight => Control.GrowDirection.Both,
-                WindowAlignment.LowerLeft => Control.GrowDirection.Begin,
-                WindowAlignment.LowerCenter => Control.GrowDirection.Begin,
-                WindowAlignment.LowerRight => Control.GrowDirection.Begin,
-                _ => throw new System.NotImplementedException(),
-            };
+                case WindowDirection.Horizontal:
+                    switch (layoutSetup.windowAlignment)
+                    {
+                        case WindowAlignment.UpperLeft:
+                        case WindowAlignment.MiddleLeft:
+                        case WindowAlignment.LowerLeft:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.Begin;
+                            break;
+                        case WindowAlignment.UpperCenter:
+                        case WindowAlignment.MiddleCenter:
+                        case WindowAlignment.LowerCenter:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.Center;
+                            break;
+                        case WindowAlignment.UpperRight:
+                        case WindowAlignment.MiddleRight:
+                        case WindowAlignment.LowerRight:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.End;
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                    break;
+                case WindowDirection.Vertical:
+                    switch (layoutSetup.windowAlignment)
+                    {
+                        case WindowAlignment.UpperLeft:
+                        case WindowAlignment.UpperRight:
+                        case WindowAlignment.UpperCenter:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.Begin;
+                            break;
+                        case WindowAlignment.MiddleLeft:
+                        case WindowAlignment.MiddleRight:
+                        case WindowAlignment.MiddleCenter:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.Center;
+                            break;
+                        case WindowAlignment.LowerLeft:
+                        case WindowAlignment.LowerRight:
+                        case WindowAlignment.LowerCenter:
+                            layoutAlignment.Alignment = BoxContainer.AlignmentMode.End;
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                    break;
+            }
 
             layoutAlignment.Initialize(layoutAlignment, layoutSetup);
             if (layoutName != string.Empty)
-                newLayout.Name = layoutName;
-            newLayout.Visible = true;
-            newLayout.Scale = Vector2.One;
+                layoutAlignment.Name = layoutName;
+            layoutAlignment.Visible = true;
+            layoutAlignment.Scale = Vector2.One;
             return layoutAlignment;
         }
 
@@ -309,8 +349,9 @@ namespace ChosenConcept.APFramework.UI
         {
             WindowUI window = InstantiateWindow(windowName, layout);
             window.Initialize(windowName, menuName, setup);
-            _windows.Add(window);
+            window.Name = window.windowTag;
             window.Visible = false;
+            _windows.Add(window);
             return window;
         }
 
@@ -324,7 +365,6 @@ namespace ChosenConcept.APFramework.UI
             layout.AddChild(window);
             layout.RegisterWindow(window);
             layout.Name = windowName;
-            window.Name = windowName;
             window.Scale = Vector2.One;
             window.RegisterLayout(layout);
             return window;
@@ -336,7 +376,6 @@ namespace ChosenConcept.APFramework.UI
             WindowUI window = this._windowTemplateScene.Instantiate<WindowUI>();
             layout.AddChild(window);
             layout.RegisterWindow(window);
-            window.Name = windowName;
             window.Scale = Vector2.One;
             window.RegisterLayout(layout);
             return window;

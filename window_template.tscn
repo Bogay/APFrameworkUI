@@ -8,13 +8,9 @@
 [node name="WindowTemplate" type="Control" node_paths=PackedStringArray("_drawText", "_outlineBuilder", "_windowMask", "_background", "_layout")]
 visible = false
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+anchors_preset = 0
+size_flags_horizontal = 0
+size_flags_vertical = 4
 script = ExtResource("1_f6u7a")
 _drawText = NodePath("ContentLabel")
 _outlineBuilder = NodePath("WindowOutline")
