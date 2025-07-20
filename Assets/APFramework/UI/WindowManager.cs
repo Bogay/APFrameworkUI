@@ -339,8 +339,8 @@ namespace ChosenConcept.APFramework.UI
         {
             WindowUI window = InstantiateWindow(windowName, layoutSetup);
             window.Initialize(windowName, menuName, setup);
-            _windows.Add(window);
             window.Visible = false;
+            _windows.Add(window);
             return window;
         }
 
@@ -359,7 +359,6 @@ namespace ChosenConcept.APFramework.UI
         WindowUI InstantiateWindow(string windowName, LayoutSetup layoutSetup)
         {
             LayoutAlignment layout = InstantiateLayout(layoutSetup);
-            // WindowUI window = _windowTemplate.Duplicate((int)DuplicateFlags.UseInstantiation) as WindowUI;
             WindowUI window = this._windowTemplateScene.Instantiate<WindowUI>();
             window.SetVisible(true);
             layout.AddChild(window);
@@ -433,7 +432,10 @@ namespace ChosenConcept.APFramework.UI
             EnableGlobalVisibility(true);
         }
 
-        public bool CheckClosestDirectionalMatch(SimpleMenu source, Vector2 currentPosition, Vector2 inputDirection,
+        public bool CheckClosestDirectionalMatch(
+            SimpleMenu source,
+            Vector2 currentPosition,
+            Vector2 inputDirection,
             bool allowCycleBetweenWindows)
         {
             float minScore = Mathf.Inf;
@@ -481,14 +483,11 @@ namespace ChosenConcept.APFramework.UI
                 source.SetFocused(false);
                 nearestMenu.SetFocused(true);
                 nearestMenu.SetCurrentSelection(nearestInteractableIndex);
+                GD.Print($"Switched focus to {nearestMenu.Name} at index {nearestInteractableIndex}");
                 return true;
             }
 
-            if (allowCycleBetweenWindows)
-            {
-                // TODO: maybe?
-            }
-
+            GD.Print($"No suitable menu found for direction {inputDirection} from {currentPosition}");
             return false;
         }
 
@@ -516,7 +515,7 @@ namespace ChosenConcept.APFramework.UI
                 return;
             foreach (SimpleMenu menu in _simpleMenus)
             {
-                if (!menu.isDisplayActive || !menu.isNavigationActive)
+                if (!menu.isDisplayActive || !menu.isNavigationActive || !menu.canNavigate)
                     continue;
                 menu.SetFocused(true);
                 menu.SetCurrentSelection(0);

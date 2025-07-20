@@ -57,13 +57,13 @@ namespace ChosenConcept.APFramework.UI.Input
                 GD.Print($"{Name}: OnConfirm");
                 _activeTarget?.OnConfirm();
             }
-
             if (GodotInput.IsActionJustPressed("ui_cancel"))
             {
                 GD.Print($"{Name}: OnCancel");
                 _activeTarget?.OnCancel();
             }
 
+#if AUTOPANIC_GODOT_MOUSE_ENABLED
             // Handle mouse input
             Vector2 currentMousePosition = GetViewport().GetMousePosition();
             _mouseDelta = currentMousePosition - _lastMousePosition;
@@ -88,9 +88,9 @@ namespace ChosenConcept.APFramework.UI.Input
                 scrollDelta.Y = 1.0f;
             if (GodotInput.IsActionJustPressed("ui_text_scroll_down"))
                 scrollDelta.Y = -1.0f;
-
             if (scrollDelta.LengthSquared() > 0)
                 _activeTarget?.OnScroll(scrollDelta);
+#endif
 
             // Handle movement changes
             if (_lastMovement != movement)

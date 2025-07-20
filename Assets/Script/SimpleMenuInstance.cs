@@ -10,11 +10,14 @@ using Godot;
 public partial class SimpleMenuInstance : Node
 {
     [Export] Godot.Collections.Array<LayoutSetup> _layoutSetups = new();
+    [Export] bool Active = true;
     Godot.Collections.Array<SimpleMenu> _simpleMenus = new();
-    bool _active;
 
     public override void _Ready()
     {
+        if (!Active)
+            return;
+
         int i = 0;
         foreach (LayoutSetup layout in _layoutSetups)
         {
@@ -46,7 +49,7 @@ public partial class SimpleMenuInstance : Node
 
     public override void _Process(double delta)
     {
-        if (!_active)
+        if (!Active)
             return;
         bool any = false;
         foreach (SimpleMenu x in _simpleMenus)
@@ -59,14 +62,14 @@ public partial class SimpleMenuInstance : Node
         }
         if (!any)
         {
-            _active = false;
+            Active = false;
             WindowManager.instance.GetMenu<ExampleMenu>().OpenMenu(true);
         }
     }
 
     public void OpenMenu()
     {
-        _active = true;
+        Active = true;
         foreach (SimpleMenu menu in _simpleMenus)
         {
             menu.OpenMenu(true);

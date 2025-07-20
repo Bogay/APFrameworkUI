@@ -1,12 +1,16 @@
-[gd_scene load_steps=11 format=3 uid="uid://sid6asbchic7"]
+[gd_scene load_steps=17 format=3 uid="uid://sid6asbchic7"]
 
 [ext_resource type="Script" uid="uid://dbmvwtls5c6mm" path="res://Assets/APFramework/UI/WindowManager.cs" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://d2je6x61my1io" path="res://window_template.tscn" id="2_lquwl"]
+[ext_resource type="PackedScene" uid="uid://d2je6x61my1io" path="res://GameResources/System/window_template.tscn" id="2_lquwl"]
 [ext_resource type="Texture2D" uid="uid://bwvqxeydvbc4m" path="res://icon.svg" id="3_7mycd"]
-[ext_resource type="PackedScene" uid="uid://cumuph0y4ae0f" path="res://selection_provider.tscn" id="3_272bh"]
+[ext_resource type="PackedScene" uid="uid://cumuph0y4ae0f" path="res://GameResources/System/selection_provider.tscn" id="3_272bh"]
 [ext_resource type="Script" uid="uid://covhi7kpxh6jo" path="res://Assets/APFramework/UI/Provider/TextInputProvider.cs" id="6_7mycd"]
 [ext_resource type="Script" uid="uid://ddb5250wv0mj1" path="res://Assets/Script/SimpleMenuInstance.cs" id="7_272bh"]
+[ext_resource type="Script" uid="uid://2yd87jmt1un" path="res://Scripts/MockController.cs" id="8_4c57u"]
 [ext_resource type="Script" uid="uid://d3mbtcv05bj1v" path="res://Assets/APFramework/UI/Layout/LayoutSetup.cs" id="8_5vw27"]
+[ext_resource type="Resource" uid="uid://biuqxq4l6yxs5" path="res://GameResources/cube_credits.tres" id="9_efxa6"]
+[ext_resource type="Script" uid="uid://dwwt82t1nos0g" path="res://Scripts/SetupMenu.cs" id="10_dg77c"]
+[ext_resource type="Resource" uid="uid://b2elc26fdiduv" path="res://GameResources/cube_message_bus.tres" id="10_efxa6"]
 
 [sub_resource type="Resource" id="Resource_kek77"]
 script = ExtResource("8_5vw27")
@@ -41,13 +45,34 @@ _offset = Vector4(0, 0, 0, 0)
 _spacing = 0
 metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
 
+[sub_resource type="Resource" id="Resource_4c57u"]
+script = ExtResource("8_5vw27")
+_menuLayer = 0
+_windowAlignment = 0
+_windowDirection = 0
+_offsetSource = 0
+_offsetType = 0
+_offset = Vector4(0, 0, 0, 0)
+_spacing = 0
+metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
+
+[sub_resource type="Resource" id="Resource_efxa6"]
+script = ExtResource("8_5vw27")
+_menuLayer = 0
+_windowAlignment = 6
+_windowDirection = 0
+_offsetSource = 0
+_offsetType = 0
+_offset = Vector4(0, 0, 0, 0)
+_spacing = 0
+metadata/_custom_type_script = "uid://d3mbtcv05bj1v"
+
 [node name="Node2D" type="Node2D"]
 
-[node name="WindowManager" type="Node" parent="." node_paths=PackedStringArray("_layerTemplate", "_layoutTemplate", "_backgroundTemplate", "_textInputProvider")]
+[node name="WindowManager" type="Node" parent="." node_paths=PackedStringArray("_layerTemplate", "_backgroundTemplate", "_textInputProvider")]
 script = ExtResource("1_ig7tw")
 _windowTemplateScene = ExtResource("2_lquwl")
 _layerTemplate = NodePath("LayerTemplate")
-_layoutTemplate = NodePath("")
 _backgroundTemplate = NodePath("BackgroundTemplate")
 _textInputProvider = NodePath("TextInputProvider")
 _selectionProviderScene = ExtResource("3_272bh")
@@ -69,4 +94,21 @@ metadata/_custom_type_script = "uid://covhi7kpxh6jo"
 [node name="SimpleMenuInstance" type="Node" parent="."]
 script = ExtResource("7_272bh")
 _layoutSetups = Array[ExtResource("8_5vw27")]([SubResource("Resource_kek77"), SubResource("Resource_272bh"), SubResource("Resource_5vw27")])
+Active = false
 metadata/_custom_type_script = "uid://ddb5250wv0mj1"
+
+[node name="CubeHarvestController" type="Node" parent="."]
+
+[node name="MockController" type="Node" parent="CubeHarvestController"]
+script = ExtResource("8_4c57u")
+Credits = ExtResource("9_efxa6")
+MessageBus = ExtResource("10_efxa6")
+metadata/_custom_type_script = "uid://2yd87jmt1un"
+
+[node name="SetupMenu" type="Node" parent="CubeHarvestController"]
+script = ExtResource("10_dg77c")
+Credits = ExtResource("9_efxa6")
+MessageBus = ExtResource("10_efxa6")
+CreditsOverviewLayoutSetup = SubResource("Resource_4c57u")
+actionPanelLayoutSetup = SubResource("Resource_efxa6")
+metadata/_custom_type_script = "uid://dwwt82t1nos0g"

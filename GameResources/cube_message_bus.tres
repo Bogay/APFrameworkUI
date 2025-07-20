@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CubeMessageBus" load_steps=2 format=3 uid="uid://b2elc26fdiduv"]
+
+[ext_resource type="Script" uid="uid://c6a0u53f5xm0h" path="res://Scripts/CubeMessageBus.cs" id="1_3clx6"]
+
+[resource]
+script = ExtResource("1_3clx6")
+metadata/_custom_type_script = "uid://c6a0u53f5xm0h"

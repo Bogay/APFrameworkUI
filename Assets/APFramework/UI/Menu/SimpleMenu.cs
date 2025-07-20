@@ -57,6 +57,7 @@ namespace ChosenConcept.APFramework.UI.Menu
         public string menuTag => $"Interface.{_menuName}";
         public bool isDisplayActive => _displayActive;
         public bool isNavigationActive => _navigationActive;
+        public bool canNavigate => _windowInstance.canNavigate;
         public WindowUI windowInstance => _windowInstance;
         public bool focused => _focused;
         public bool MouseSelectionTargetExists => _mouseSelectionTargetExists;
@@ -444,8 +445,12 @@ namespace ChosenConcept.APFramework.UI.Menu
                 // Ignore when mouse scroll to prevent scrolling out of a window
                 if (!_inElementInputMode && !_selectionUpdated && !mouseScrollOverride)
                 {
-                    WindowManager.instance.CheckClosestDirectionalMatch(this,
-                        currentSelectable.cachedPosition.Item1, _move.Normalized(), _menuSetup.allowCycleBetweenWindows);
+                    GD.Print($"{Name}: UpdateSelection - checking closest directional match");
+                    WindowManager.instance.CheckClosestDirectionalMatch(
+                        this,
+                        currentSelectable.cachedPosition.Item1,
+                        _move.Normalized(),
+                        _menuSetup.allowCycleBetweenWindows);
                 }
 
                 _move = Vector2.Zero;

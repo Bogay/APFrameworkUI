@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="CubeCredits" load_steps=2 format=3 uid="uid://biuqxq4l6yxs5"]
+
+[ext_resource type="Script" uid="uid://bva4cbsfdwh7d" path="res://Scripts/CubeCredits.cs" id="1_6qiv8"]
+
+[resource]
+script = ExtResource("1_6qiv8")
+Value = 0
+metadata/_custom_type_script = "uid://bva4cbsfdwh7d"
